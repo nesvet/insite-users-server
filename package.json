@@ -1,0 +1,38 @@
+{
+	"name": "insite-users-server",
+	"version": "1.0.334",
+	"description": "inSite users server side",
+	"type": "module",
+	"main": "./lib/index.js",
+	"module": "./lib/index.js",
+	"exports": {
+		".": "./lib/index.js",
+		"./ws": "./lib/ws/index.js"
+	},
+	"packageManager": "yarn@1.22.22",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/nesvet/insite-users-server.git"
+	},
+	"keywords": [
+		"insite",
+		"users",
+		"server"
+	],
+	"author": "Eugene Nesvetaev <dev@nesvet.dev> (https://nesvet.dev/)",
+	"license": "MIT",
+	"dependencies": {
+		"@nesvet/n": "^1",
+		"@nesvet/deprecated-extensions": "^1",
+		"insite-db": "^1",
+		"insite-subscriptions-server": "^1",
+		"argon2": "^0",
+		"eventemitter3": "^5"
+	},
+	"devDependencies": {
+		"@nesvet/eslint-config": "^1"
+	}
+}
