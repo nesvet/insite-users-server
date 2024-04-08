@@ -3,15 +3,16 @@
 	"version": "1.0.334",
 	"description": "inSite users server side",
 	"type": "module",
-	"main": "./lib/index.js",
-	"module": "./lib/index.js",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
 	"exports": {
-		".": "./lib/index.js",
-		"./ws": "./lib/ws/index.js"
+		".": "./dist/index.js",
+		"./ws": "./dist/ws.js"
 	},
 	"packageManager": "yarn@1.22.22",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"build": "node .conveyer"
 	},
 	"repository": {
 		"type": "git",
@@ -25,14 +26,15 @@
 	"author": "Eugene Nesvetaev <dev@nesvet.dev> (https://nesvet.dev/)",
 	"license": "MIT",
 	"dependencies": {
-		"@nesvet/n": "^1",
 		"@nesvet/deprecated-extensions": "^1",
-		"insite-db": "^1",
-		"insite-subscriptions-server": "^1",
+		"@nesvet/n": "^1",
 		"argon2": "^0",
-		"eventemitter3": "^5"
+		"eventemitter3": "^5",
+		"insite-db": "^1",
+		"insite-subscriptions-server": "^1"
 	},
 	"devDependencies": {
+		"@nesvet/conveyer": "^1",
 		"@nesvet/eslint-config": "^1"
 	}
 }
