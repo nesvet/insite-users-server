@@ -1,4 +1,4 @@
-import "@nesvet/deprecated-extensions";
+import "@nesvet/deprecated-extensions/server";
 
 
 export * from "./users";

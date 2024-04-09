@@ -1,7 +1,7 @@
-import { ObjectId } from "insite-db";
 import { debounce } from "@nesvet/n";
 import argon2 from "argon2";
 import EventEmitter from "eventemitter3";
+import { ObjectId } from "insite-db";
 import { Abilities } from "../abilities";
 import { Orgs } from "../orgs";
 import { Roles } from "../roles";
@@ -80,8 +80,8 @@ export class Users extends Map {
 			
 			if (!await this.collection.countDocuments({ roles: "root" }))
 				await this.new({
-					email: process.env.INSITE_ROOT_EMAIL ?? `root@${process.env.REMOTE_HOST || "insite.insite"}`,
-					password: process.env.INSITE_ROOT_PASSWORD ?? (process.env.MONGO_DBNAME || "insite"),
+					email: process.env.INSITE_ROOT_EMAIL ?? "insite@root.email",
+					password: process.env.INSITE_ROOT_PASSWORD ?? "inSiteRootPassword",
 					roles: [ "root" ],
 					name: { first: "Root" },
 					org: null,
