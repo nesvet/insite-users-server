@@ -4,7 +4,7 @@ import { debounce } from "@nesvet/n";
 const rolesSnapshots = new Map();
 const permissionsSnapshots = new Map();
 
-const staticHost = process.env.STATIC_HOST ?? "localhost";
+const staticUrl = process.env.INSITE_STATIC_URL ?? "http://localhost:8080";
 
 
 export class User {
@@ -94,7 +94,7 @@ export class User {
 		
 		if (avatar !== undefined && this.avatar !== avatar) {
 			this.avatar = avatar;
-			this.avatarUrl = avatar && `https://${staticHost}/avatars/${this._id}-${avatar}.webp`;
+			this.avatarUrl = avatar && `${staticUrl}/avatars/${this._id}-${avatar}.webp`;
 		}
 		
 		if (isRolesUpdated || isOrgUpdated) {
