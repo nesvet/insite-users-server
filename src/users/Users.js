@@ -1,5 +1,5 @@
 import { debounce } from "@nesvet/n";
-import argon2 from "argon2";
+import { hash, verify } from "argon2";
 import EventEmitter from "eventemitter3";
 import { ObjectId } from "insite-db";
 import { Abilities } from "../abilities";
@@ -52,7 +52,7 @@ export class Users extends Map {
 		super();
 		
 		const eventEmitter = new EventEmitter();
-		for (const key in eventEmitter)
+		for (const key of Object.keys(eventEmitter))
 			this[key] = eventEmitter[key];
 		
 		this.collections = collections;
@@ -155,7 +155,7 @@ export class Users extends Map {
 		
 	};
 	
-	init = async () => {
+	init = () => {
 		
 		this.isInited = true;
 		
@@ -192,7 +192,7 @@ export class Users extends Map {
 			await this.collection.insertOne({
 				_id: (new ObjectId()).toString(),
 				email,
-				password: await argon2.hash(password),
+				password: await hash(password),
 				roles: this.isInited ? this.roles.cleanUpIds(roles) : roles,
 				name: {
 					first: name.first ?? "",
@@ -215,7 +215,7 @@ export class Users extends Map {
 			throw new Error("emptypasswordisnotallowed");
 		else
 			await Promise.all([
-				this.collection.updateOne({ _id }, { $set: { password: await argon2.hash(newPassword) } }),
+				this.collection.updateOne({ _id }, { $set: { password: await hash(newPassword) } }),
 				this.sessions.collection.deleteMany({ user: _id })
 			]);
 		
@@ -226,7 +226,7 @@ export class Users extends Map {
 		
 		if (!user)
 			throw new Error("usernotfound");
-		else if (!await argon2.verify(user.password, password))
+		else if (!await verify(user.password, password))
 			throw new Error("incorrectpassword");
 		else if (!user.abilities.login)
 			throw new Error("userisnotabletologin");

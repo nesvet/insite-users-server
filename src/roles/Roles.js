@@ -106,7 +106,7 @@ export class Roles extends Map {
 	
 	sorted = [];
 	
-	async update() {
+	update() {
 		
 		const array = [ ...this.values() ];
 		
