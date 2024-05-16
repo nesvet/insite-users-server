@@ -2,7 +2,7 @@ import { schema as jsonSchema } from "./schema";
 
 
 export class Avatars {
-	constructor(users, options = {}) {
+	constructor(users/* , options = {} */) {
 		this.users = users;
 		this.collections = users.collections;
 		

@@ -8,4 +8,5 @@ export const regexps = {
 };
 
 for (const key in regexps)
-	regexps[key].pattern = regexps[key].toString().slice(1, -1);
+	if (Object.hasOwn(regexps, key))
+		regexps[key].pattern = regexps[key].toString().slice(1, -1);

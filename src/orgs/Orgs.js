@@ -97,7 +97,7 @@ export class Orgs extends Map {
 	
 	sorted = [];
 	
-	async update() {
+	update() {
 		
 		const array = [ ...this.values() ];
 		const sorted = [];

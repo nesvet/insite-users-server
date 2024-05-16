@@ -1,11 +1,11 @@
 import {
 	AbilitiesPublication,
+	OrgsExtendedPublication,
+	OrgsPublication,
 	RolesPublication,
 	UserPublication,
-	UsersPublication,
 	UsersExtendedPublication,
-	OrgsPublication,
-	OrgsExtendedPublication
+	UsersPublication
 } from "./publications";
 
 
@@ -92,7 +92,7 @@ export class UsersServer {
 		
 		for (const usersSubscription of this.publication.subscriptions) {
 			const [ ws ] = usersSubscription.args;
-			if (ws.user && ws.user._id != _id)
+			if (ws.user && ws.user._id !== _id)
 				usersSubscription.handler([ [ "u"/* update */, updates, true ] ]);
 		}
 		
@@ -178,7 +178,7 @@ export class UsersServer {
 		if (typeof session == "string")
 			session = usersServer.users.sessions.get(session) ?? null;
 		
-		if (this.session != session) {
+		if (this.session !== session) {
 			if (this.session)
 				usersServer.wsBySessions.delete(this.session);
 			

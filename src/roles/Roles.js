@@ -167,10 +167,11 @@ export class Roles extends Map {
 		
 		this.collection.changeListeners.add(next => {
 			switch (next.operationType) {
-				case "insert":
+				case "insert": {
 					const role = new Role(this, next.fullDocument);
 					this.users.emit("roles-role-update", role, next);
 					break;
+				}
 				
 				case "update":
 				case "replace":

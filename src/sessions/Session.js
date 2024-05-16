@@ -20,10 +20,10 @@ export class Session {
 		
 		const sessions = this.#sessions;
 		
-		if (isOnline !== undefined && this.isOnline != isOnline) {
+		if (isOnline !== undefined && this.isOnline !== isOnline) {
 			this.isOnline = isOnline;
 			
-			if (sessions.isInited && this.user.isOnline != this.isOnline)
+			if (sessions.isInited && this.user.isOnline !== this.isOnline)
 				this.user.updateIsOnline();
 		}
 		

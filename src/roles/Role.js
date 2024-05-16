@@ -43,7 +43,7 @@ export class Role {
 				JSON.stringify(this.ownAbilities)
 			].join("\n");
 			
-			if (snapshot != snapshots.get(this._id)) {
+			if (snapshot !== snapshots.get(this._id)) {
 				snapshots.set(this._id, snapshot);
 				
 				if (roles.users.isInited)
