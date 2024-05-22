@@ -1,6 +1,6 @@
 {
   "name": "insite-users-server",
-  "version": "1.0.390",
+  "version": "1.0.391",
   "description": "inSite users server side",
   "type": "module",
   "main": "./dist/index.js",
