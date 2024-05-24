@@ -9,5 +9,5 @@ $ npm install insite-users-server
 Or
 
 ```sh
-$ yarn add insite-users-server
+$ bun add insite-users-server
 ```

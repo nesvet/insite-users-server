@@ -3,8 +3,8 @@
 	"env": {
 		"node": true
 	},
-	"root": true,
 	"ignorePatterns": [
 		"dist/*"
-	]
+	],
+	"root": true
 }

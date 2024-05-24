@@ -9,7 +9,7 @@
     ".": "./dist/index.js",
     "./ws": "./dist/ws.js"
   },
-  "packageManager": "bun@1.1.8",
+  "packageManager": "bun@1.1.9",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "bun .conveyer.js"
