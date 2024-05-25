@@ -1,16 +1,21 @@
 export class Session {
 	constructor(sessions, sessionDoc) {
-		this.#sessions = sessions;
+		const user = sessions.users.get(sessionDoc.user);
 		
-		this._id = sessionDoc._id;
-		sessions.set(this._id, this);
-		
-		this.user = sessions.users.get(sessionDoc.user);
-		this.user.sessions.add(this);
-		
-		sessions.users.bySessionId.set(this._id, this.user);
-		
-		this.update(sessionDoc);
+		if (user) {
+			this.#sessions = sessions;
+			
+			this._id = sessionDoc._id;
+			this.#sessions.set(this._id, this);
+			
+			this.user = user;
+			this.user.sessions.add(this);
+			
+			this.#sessions.users.bySessionId.set(this._id, this.user);
+			
+			this.update(sessionDoc);
+		} else
+			sessions.collection.deleteOne({ _id: sessionDoc._id });
 		
 	}
 	
@@ -56,13 +61,11 @@ export class Session {
 	
 	delete() {
 		
-		const sessions = this.#sessions;
-		
-		sessions.delete(this._id);
+		this.#sessions.delete(this._id);
 		this.user.sessions.delete(this);
-		sessions.users.bySessionId.delete(this._id);
+		this.#sessions.users.bySessionId.delete(this._id);
 		
-		sessions.users.emit("session-delete", this);
+		this.#sessions.users.emit("session-delete", this);
 		
 		if (this.isOnline)
 			this.user.updateIsOnline();
