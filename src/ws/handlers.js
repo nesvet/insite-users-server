@@ -27,13 +27,13 @@ export function setupHandlers(users, wss) {
 	wss.on("client-request:users.people.add", async (ws, { roles, org, ...rest }) => {
 		if (ws.user?.abilities.login?.sections?.includes("users")) {
 			if (!roles.length)
-				throw new Error("emptyroles");
+				throw new Err("Roles shouldn't be empty", "emptyroles");
 			
 			if (!ws.user.slaveRoleIds.includesAll(roles))
-				throw new Error("notinvolved");
+				throw new Err("Can't assign role the user is not involved in", "forbiddenrole");
 			
 			if (org && !ws.user.slaveIds.includes(org))
-				throw new Error("orgisforbidden");
+				throw new Err("Can't assign org the user is not master of", "forbiddenorg");
 			
 			await users.new({ roles, org, ...rest });
 		}
@@ -43,10 +43,10 @@ export function setupHandlers(users, wss) {
 	wss.on("client-request:users.people.change-password", async (ws, _id, newPassword) => {
 		if (ws.user?.abilities.login?.sections?.includes("users") && ws.user.permissiveIds.includes(_id)) {
 			if (typeof newPassword != "string")
-				throw new Error("passwordmustbestring");
+				throw new Err("Type of password is incorrect", "wrongpasswordtype");
 			
 			if (!newPassword)
-				throw new Error("emptypasswordisforbidden");
+				throw new Err("Password can't be empty", "emptypassword");
 			
 			await users.changePassword(_id, newPassword);
 		}
@@ -57,10 +57,10 @@ export function setupHandlers(users, wss) {
 		if (ws.user?.abilities.login?.sections?.includes("users") && ws.user.permissiveIds.includes(_id)) {
 			if (updates.roles) {
 				if (!updates.roles.length)
-					throw new Error("emptyroles");
+					throw new Err("Roles can't be empty", "emptyroles");
 				
 				if (!ws.user.slaveRoleIds.includesAll(updates.roles))
-					throw new Error("notinvolved");
+					throw new Err("Can't assign role the user is not involved in", "forbiddenrole");
 				
 				const user = users.get(_id);
 				
@@ -68,7 +68,7 @@ export function setupHandlers(users, wss) {
 			}
 			
 			if (updates.org && !ws.user.slaveIds.includes(updates.org))
-				throw new Error("orgisforbidden");
+				throw new Err("Can't assign org the user is not master of", "forbiddenorg");
 			
 			await users.collection.updateOne({ _id }, { $set: updates });
 		}
@@ -173,7 +173,7 @@ export function setupHandlers(users, wss) {
 	wss.on("client-request:users.orgs.add", async (ws, org) => {
 		if (ws.user?.abilities.login?.sections?.includes("users")) {
 			if (!org.title)
-				throw new Error("emptytitleisforbidden");
+				throw new Err("Title can't be empty", "emptytitle");
 			
 			await users.orgs.new(org, ws.user._id);
 		}
@@ -183,11 +183,11 @@ export function setupHandlers(users, wss) {
 	wss.on("client-request:users.orgs.update", async (ws, _id, updates) => {
 		if (ws.user?.abilities.login?.sections?.includes("users") && ws.user.slaveIds.includes(_id)) {
 			if (updates.title !== undefined && !updates.title)
-				throw new Error("emptytitleisforbidden");
+				throw new Err("Title can't be empty", "emptytitle");
 			
 			if (updates.owners) {
 				if (!ws.user.slaveIds.includesAll(updates.owners))
-					throw new Error("ownersareforbidden");
+					throw new Err("Can't assign owners the user is not master of", "forbiddenowners");
 				
 				const org = users.orgs.get(_id);
 				
@@ -240,7 +240,7 @@ export function setupHandlers(users, wss) {
 					
 					updates.involves = users.roles.cleanUpIds(updates.involves);
 				} else
-					throw new Error("notinvolved");
+					throw new Err("Can't assign role the user is not involved in", "forbiddenrole");
 			
 			await users.roles.collection.updateOne({ _id }, { $set: updates });
 		}
