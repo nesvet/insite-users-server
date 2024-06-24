@@ -1,6 +1,6 @@
 {
   "name": "insite-users-server",
-  "version": "1.0.405",
+  "version": "1.0.472",
   "description": "inSite users server side",
   "type": "module",
   "main": "./dist/index.js",
@@ -9,7 +9,7 @@
     ".": "./dist/index.js",
     "./ws": "./dist/ws.js"
   },
-  "packageManager": "bun@1.1.12",
+  "packageManager": "bun@1.1.16",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "bun .conveyer.js",
@@ -27,15 +27,15 @@
   "author": "Eugene Nesvetaev <dev@nesvet.dev> (https://nesvet.dev/)",
   "license": "MIT",
   "dependencies": {
-    "@nesvet/deprecated-extensions": "^1",
-    "@nesvet/n": "^1",
-    "argon2": "^0",
-    "eventemitter3": "^5",
-    "insite-db": "^1",
-    "insite-subscriptions-server": "^1"
+    "@nesvet/deprecated-extensions": "^1.1.1",
+    "@nesvet/n": "^1.0.63",
+    "argon2": "^0.40.3",
+    "eventemitter3": "^5.0.1",
+    "insite-db": "^1.2.5",
+    "insite-subscriptions-server": "^1.0.240"
   },
   "devDependencies": {
-    "@nesvet/conveyer": "^2",
+    "@nesvet/conveyer": "^2.2.0",
     "@nesvet/eslint-config": "^2.0.17"
   }
 }
