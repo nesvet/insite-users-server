@@ -201,6 +201,19 @@ export class UsersExtendedPublication extends CollectionMapPublication {
 }
 
 
+export class SessionsPublication extends CollectionMapPublication {
+	constructor(sessions) {
+		super("users.people.sessions", sessions.collection, (ws, userId) =>
+			ws.user?.abilities.login?.sections?.includes("users") && ws.user.permissiveIds.includes(userId) && {
+				query: { user: userId },
+				projection: { remoteAddress: 1, isOnline: 1, prolongedAt: 1 },
+				sort: { prolongedAt: -1 }
+			}
+		);
+	}
+}
+
+
 export class OrgsPublication extends CollectionMapPublication {
 	constructor(orgs, options = {}) {
 		

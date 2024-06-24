@@ -52,6 +52,7 @@ export class UsersServer {
 		users.on("user-create", UsersServer.handleUserCreate);
 		users.on("user-is-online", UsersServer.handleUserIsOnline);
 		
+		new SessionsPublication(users.sessions);
 		users.on("session-delete", this.#handleSessionDelete);
 		
 		users.orgs.publication = new OrgsPublication(users.orgs, orgsPublicationOptions);
@@ -71,6 +72,8 @@ export class UsersServer {
 		}
 		
 		wss.on("client-closed", UsersServer.handleClientClosed);
+		
+		setupHandlers(users, wss);
 		
 	}
 	
