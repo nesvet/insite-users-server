@@ -12,7 +12,7 @@ export const schema = {
 	properties: {
 		_id: {
 			bsonType: "string",
-			pattern: regexps._id.pattern
+			pattern: regexps._id.source
 		},
 		type: {
 			bsonType: "string",

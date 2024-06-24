@@ -8,6 +8,8 @@ export class AbilitiesPublication extends Publication {
 			fetch({ user }) {
 				if (user?.abilities.login?.sections?.includes("users"))
 					return { abilities: abilities.getSchemeFor(user) };
+				
+				return null;
 			}
 			
 		});
@@ -122,6 +124,8 @@ export class UserPublication extends Publication {
 					
 					return userDoc;
 				}
+				
+				return null;
 			},
 			
 			onUnsubscribe(subscription) {

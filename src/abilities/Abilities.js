@@ -56,12 +56,12 @@ export class Abilities extends Map {
 			if (schema) {
 				if (schema.isInheritable !== false && ability)
 					if (!target[abilityId])
-						target[abilityId] = Object.deepClone(ability);
+						target[abilityId] = structuredClone(ability);
 					else if (schema.params)
 						for (const param of schema.params)
 							if (param.isInheritable !== false && ability[param._id] !== undefined)
 								if (!target[abilityId][param._id])
-									target[abilityId][param._id] = Object.deepClone(ability[param._id]);
+									target[abilityId][param._id] = structuredClone(ability[param._id]);
 								else
 									if (param.type === "number") {
 										if (target[abilityId][param._id] < ability[param._id])
@@ -139,7 +139,7 @@ export class Abilities extends Map {
 			}
 			
 			return abilities;
-		})(Object.deepClone(this.tree));
+		})(structuredClone(this.tree));
 	}
 	
 }

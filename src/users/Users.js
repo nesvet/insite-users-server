@@ -1,6 +1,6 @@
-import { debounce } from "@nesvet/n";
 import * as argon2 from "argon2";
 import EventEmitter from "eventemitter3";
+import { debounce } from "@nesvet/n";
 import { ObjectId } from "insite-db";
 import { Abilities } from "../abilities";
 import { Orgs } from "../orgs";
@@ -23,16 +23,16 @@ function sortUsersAndOrgs(a, b) {
 				a.name.last > b.name.last ?
 					1 :
 					a.name.last < b.name.last ? -1 : 0 :
-			 (!a.name.last && !b.name.last) ?
+				(!a.name.last && !b.name.last) ?
 					a.displayLabel > b.displayLabel ?
 						1 :
 						a.displayLabel < b.displayLabel ? -1 : 0 :
-			 a.name.last ? -1 : 1 :
-		 (a.isOrg && b.isOrg) ?
+					a.name.last ? -1 : 1 :
+			(a.isOrg && b.isOrg) ?
 				a.title > b.title ?
 					1 :
 					a.title < b.title ? -1 : 0 :
-		 a.isOrg ? -1 : 1
+				a.isOrg ? -1 : 1
 	);
 }
 
@@ -188,22 +188,22 @@ export class Users extends Map {
 	async new({ email, password, roles, name, org, job, ...restProps }) {
 		if (this.byEmail.has(email))
 			throw new Error("User exists");
-		else
-			await this.collection.insertOne({
-				_id: (new ObjectId()).toString(),
-				email,
-				password: await argon2.hash(password),
-				roles: this.isInited ? this.roles.cleanUpIds(roles) : roles,
-				name: {
-					first: name.first ?? "",
-					middle: name.middle ?? "",
-					last: name.last ?? ""
-				},
-				org: org ?? null,
-				job: job ?? "",
-				...Object.delete(restProps, "_id"),
-				createdAt: Date.now()
-			});
+		
+		await this.collection.insertOne({
+			_id: (new ObjectId()).toString(),
+			email,
+			password: await argon2.hash(password),
+			roles: this.isInited ? this.roles.cleanUpIds(roles) : roles,
+			name: {
+				first: name.first ?? "",
+				middle: name.middle ?? "",
+				last: name.last ?? ""
+			},
+			org: org ?? null,
+			job: job ?? "",
+			...Object.delete(restProps, "_id"),
+			createdAt: Date.now()
+		});
 		
 		return true;
 	}
@@ -211,13 +211,14 @@ export class Users extends Map {
 	async changePassword(_id, newPassword) {
 		if (!this.has(_id))
 			throw new Error("usernotfound");
-		else if (!newPassword)
+		
+		if (!newPassword)
 			throw new Error("emptypasswordisnotallowed");
-		else
-			await Promise.all([
-				this.collection.updateOne({ _id }, { $set: { password: await argon2.hash(newPassword) } }),
-				this.sessions.collection.deleteMany({ user: _id })
-			]);
+		
+		await Promise.all([
+			this.collection.updateOne({ _id }, { $set: { password: await argon2.hash(newPassword) } }),
+			this.sessions.collection.deleteMany({ user: _id })
+		]);
 		
 	}
 	
@@ -226,9 +227,11 @@ export class Users extends Map {
 		
 		if (!user)
 			throw new Error("usernotfound");
-		else if (!await argon2.verify(user.password, password))
+		
+		if (!await argon2.verify(user.password, password))
 			throw new Error("incorrectpassword");
-		else if (!user.abilities.login)
+		
+		if (!user.abilities.login)
 			throw new Error("userisnotabletologin");
 		
 		return this.sessions.new(user, sessionProps);

@@ -1,8 +1,10 @@
+import { setupHandlers } from "./handlers";
 import {
 	AbilitiesPublication,
 	OrgsExtendedPublication,
 	OrgsPublication,
 	RolesPublication,
+	SessionsPublication,
 	UserPublication,
 	UsersExtendedPublication,
 	UsersPublication

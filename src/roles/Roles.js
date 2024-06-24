@@ -115,7 +115,7 @@ export class Roles extends Map {
 			if (role !== this.root && !array.some(anotherRole => anotherRole.ownInvolveIds.includes(role._id)))
 				this.root.ownInvolveIds.push(role._id);
 			role.involves.clear();
-			role.abilities = Object.deepClone(role.ownAbilities);
+			role.abilities = structuredClone(role.ownAbilities);
 			role.inheritedAbilities = {};
 		}
 		

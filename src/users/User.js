@@ -210,6 +210,7 @@ export class User {
 		if (this.sessions.size > sessionsLimit)
 			return this.#users.sessions.collection.deleteMany({ _id: { $in: [ ...this.sessions ].sort((a, b) => a.expiresAt - b.expiresAt).slice(0, this.sessions.size - sessionsLimit).ids() } });
 		
+		return null;
 	}
 	
 	updateIsOnline = debounce(() => {

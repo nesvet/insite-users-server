@@ -15,22 +15,22 @@ export const basisSchema = {
 	properties: {
 		_id: {
 			bsonType: "string",
-			pattern: regexps._id.pattern
+			pattern: regexps._id.source
 		},
 		email: {
 			bsonType: "string",
-			pattern: regexps.email.pattern
+			pattern: regexps.email.source
 		},
 		password: {
 			bsonType: "string",
-			pattern: regexps.argon2.pattern
+			pattern: regexps.argon2.source
 		},
 		roles: {
 			bsonType: "array",
 			uniqueItems: true,
 			items: {
 				bsonType: "string",
-				pattern: regexps.role.pattern
+				pattern: regexps.role.source
 			},
 			additionalItems: false
 		},
@@ -61,7 +61,7 @@ export const basisSchema = {
 			oneOf: [
 				{
 					bsonType: "string",
-					pattern: regexps._id.pattern
+					pattern: regexps._id.source
 				},
 				{
 					bsonType: "null"

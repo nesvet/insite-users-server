@@ -17,7 +17,7 @@ new Conveyer([
 	
 	new ESBuild({
 		title: "index",
-		entryPoints: [ "src/index.js" ],
+		entryPoints: [ "src/index.ts" ],
 		outfile: path.resolve(distDir, "index.js"),
 		...common
 	}),

@@ -13,4 +13,5 @@ export class Avatars {
 			return this;
 		})();
 	}
+	
 }

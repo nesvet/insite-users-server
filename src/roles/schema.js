@@ -13,7 +13,7 @@ export const basisSchema = {
 	properties: {
 		_id: {
 			bsonType: "string",
-			pattern: regexps.role.pattern,
+			pattern: regexps.role.source,
 			not: { enum: [ "root" ] }
 		},
 		involves: {
@@ -21,7 +21,7 @@ export const basisSchema = {
 			uniqueItems: true,
 			items: {
 				bsonType: "string",
-				pattern: regexps.role.pattern,
+				pattern: regexps.role.source,
 				not: { enum: [ "root" ] }
 			},
 			additionalItems: false

@@ -14,11 +14,11 @@ export const basisSchema = {
 	properties: {
 		_id: {
 			bsonType: "string",
-			pattern: regexps.sessionId.pattern
+			pattern: regexps.sessionId.source
 		},
 		user: {
 			bsonType: "string",
-			pattern: regexps._id.pattern
+			pattern: regexps._id.source
 		},
 		userAgent: {
 			bsonType: "string",
@@ -26,7 +26,7 @@ export const basisSchema = {
 		},
 		remoteAddress: {
 			bsonType: "string",
-			pattern: regexps.ip.pattern
+			pattern: regexps.ip.source
 		},
 		isOnline: {
 			bsonType: "bool"

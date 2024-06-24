@@ -12,7 +12,7 @@ export const basisSchema = {
 	properties: {
 		_id: {
 			bsonType: "string",
-			pattern: regexps._id.pattern
+			pattern: regexps._id.source
 		},
 		title: {
 			bsonType: "string",
@@ -27,7 +27,7 @@ export const basisSchema = {
 			uniqueItems: true,
 			items: {
 				bsonType: "string",
-				pattern: regexps._id.pattern
+				pattern: regexps._id.source
 			},
 			additionalItems: false
 		},
