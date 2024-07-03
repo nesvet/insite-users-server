@@ -60,10 +60,6 @@ export class UsersServer {
 		users.on("orgs-update", UsersServer.handleOrgsUpdate);
 		users.on("orgs-org-update", UsersServer.handleOrgsOrgUpdate);
 		
-		wss.options.WebSocket.prototype.login = UsersServer.login;
-		wss.options.WebSocket.prototype.logout = UsersServer.logout;
-		wss.options.WebSocket.prototype.setSession = UsersServer.setSession;
-		
 		wss.on("client-connect", UsersServer.handleClientConnect);
 		
 		if (wss.requestListener) {
@@ -133,7 +129,12 @@ export class UsersServer {
 	
 	
 	static handleClientConnect(ws) {
-		ws.session = null;
+		Object.assign(ws, {
+			session: null,
+			login: UsersServer.login,
+			logout: UsersServer.logout,
+			setSession: UsersServer.setSession
+		});
 		
 	}
 	
