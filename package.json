@@ -31,7 +31,7 @@
     "argon2": "^0.40.3",
     "eventemitter3": "^5.0.1",
     "insite-db": "^2.0.0",
-    "insite-subscriptions-server": "^1.0.240"
+    "insite-subscriptions-server": "^2.0.0"
   },
   "devDependencies": {
     "@nesvet/conveyer": "^2.2.1",
