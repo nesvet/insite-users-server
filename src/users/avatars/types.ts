@@ -8,3 +8,7 @@ export type AvatarDoc = {
 	ts: string;
 	data: Binary;
 };
+
+export type AvatarsOptions = {
+	//
+};

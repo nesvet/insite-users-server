@@ -1,7 +1,8 @@
+import { InSiteCollectionSchema } from "insite-db";
 import { regexps } from "../lib";
 
 
-export const basisSchema = {
+export const basisSchema: InSiteCollectionSchema = {
 	required: [
 		"_id",
 		"title",
