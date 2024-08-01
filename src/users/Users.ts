@@ -107,19 +107,12 @@ export class Users<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<str
 		
 	}
 	
-	sort(
-		// TODO: remove when @nesvet/deprecated-extensions is no longer in use --
-		callback?: (a: [any, any], b: [any, any]) => number// eslint-disable-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-		// ----------------------------------------------------------------------
-	) {
+	sort() {
 		
 		this.isSortRequired = false;
 		
 		this.sorted = [ ...this.values() ].sort((a, b) => a.name.last > b.name.last ? 1 : a.name.last < b.name.last ? -1 : 0);
 		
-		// TODO: remove when @nesvet/deprecated-extensions is no longer in use --
-		return this;
-		// ----------------------------------------------------------------------
 	}
 	
 	sortDebounced = debounce(() => this.sort(), 250);
