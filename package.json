@@ -37,7 +37,7 @@
     "@nesvet/conveyer": "^2.2.1",
     "@nesvet/eslint-config": "^2.0.24",
     "@types/node": "^20.14.13",
-    "insite-ws": "^2.0.9",
+    "insite-ws": "^2.0.11",
     "typescript": "^5.5.4"
   }
 }
