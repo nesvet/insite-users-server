@@ -70,7 +70,7 @@ export class Users<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<str
 		
 		this.initOptions = options;
 		
-		this.#initPromise = this.init!();
+		this.initPromise = this.init!();
 		
 	}
 	
@@ -178,7 +178,7 @@ export class Users<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<str
 		
 	};
 	
-	#initPromise;
+	private initPromise;
 	
 	private init? = async () => {
 		
@@ -233,7 +233,7 @@ export class Users<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<str
 	};
 	
 	whenReady() {
-		return this.#initPromise;
+		return this.initPromise;
 	}
 	
 	async new({ email, password, roles, name, org, job, ...restProps }: Omit<UserDoc, "_id" | "createdAt">) {
@@ -294,7 +294,7 @@ export class Users<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<str
 		return this.sessions.collection.deleteOne({ _id: session._id });
 	}
 	
-	#sortUsersAndOrgs(a: Org<AS> | User<AS>, b: Org<AS> | User<AS>) {
+	private sortUsersAndOrgs(a: Org<AS> | User<AS>, b: Org<AS> | User<AS>) {
 		return (
 			(a instanceof User && b instanceof User) ?
 				(a.name.last && b.name.last) ?
@@ -319,7 +319,7 @@ export class Users<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<str
 			ids
 				.map(_id => this.get(_id) || this.orgs.get(_id))
 				.filter(Boolean) as (Org<AS> | User<AS>)[]
-		).sort(this.#sortUsersAndOrgs));
+		).sort(this.sortUsersAndOrgs));
 	}
 	
 	replaceMap = new Map<string, string>();
