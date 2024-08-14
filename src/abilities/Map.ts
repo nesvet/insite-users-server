@@ -1,7 +1,9 @@
+import { empty, intersection } from "@nesvet/n";
 import type { User } from "../users/User";
 import type {
 	AbilitiesSchema,
 	Ability,
+	AbilityParam,
 	AbilityParamItems,
 	AbilityParamItemSchema,
 	AbilityParamNumber,
@@ -9,6 +11,19 @@ import type {
 	AbilityWithParams,
 	GenericAbilities
 } from "./types";
+
+
+function isAbilityWithParams(value: Ability): value is AbilityWithParams {
+	return typeof value == "object";
+}
+
+function isAbilityParamNumber(value: AbilityParam): value is AbilityParamNumber {
+	return typeof value === "number";
+}
+
+function isAbilityParamItems(value: AbilityParam): value is AbilityParamItems {
+	return Array.isArray(value);
+}
 
 
 export class AbilitiesMap<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<string, AbilitySchema> {
@@ -123,6 +138,72 @@ export class AbilitiesMap<AS extends AbilitiesSchema = AbilitiesSchema> extends 
 			
 			return abilitiesSchema;
 		})(structuredClone(this.schema) as AbilitySchema[]);
+	}
+	
+	adjust(abilities: GenericAbilities) {
+		const adjustedAbilities: Record<string, unknown> = {};
+		let isAdjusted = false;
+		
+		for (const [ _id, ability ] of Object.entries(abilities) as [ string, Ability ][]) {
+			const abilitySchema = this.get(_id);
+			if (abilitySchema)
+				if (abilitySchema.params) {
+					const adjustedAbility: AbilityWithParams = {};
+					
+					if (isAbilityWithParams(ability)) {
+						for (const paramSchema of abilitySchema.params)
+							if (paramSchema._id in ability) {
+								let paramValue = ability[paramSchema._id];
+								if (paramSchema.type === "number") {
+									if (!isAbilityParamNumber(paramValue))
+										paramValue = (paramSchema.min ?? 0) as AbilityParamNumber;
+									
+									const adjustedParamValue =
+										adjustedAbility[paramSchema._id] =
+											Math.max(Math.min(paramValue, paramSchema.max ?? Infinity), paramSchema.min ?? 0);
+									
+									if (paramValue !== adjustedParamValue)
+										isAdjusted = true;
+								} else if (paramSchema.type === "items") {
+									if (!isAbilityParamItems(paramValue))
+										paramValue = [] as AbilityParamItems;
+									
+									const adjustedParamValue =
+										adjustedAbility[paramSchema._id] =
+											intersection(paramSchema.items.map(item => item._id), paramValue);
+									
+									if (paramValue.length !== adjustedParamValue.length || paramValue.some(paramId => !adjustedParamValue.includes(paramId)))
+										isAdjusted = true;
+								}
+							}
+					} else {
+						for (const paramSchema of abilitySchema.params)
+							if (paramSchema.type === "number")
+								adjustedAbility[paramSchema._id] = paramSchema.min ?? 0;
+							else if (paramSchema.type === "items")
+								adjustedAbility[paramSchema._id] = [];
+						
+						isAdjusted = true;
+					}
+					
+					adjustedAbilities[_id] = adjustedAbility;
+				} else {
+					adjustedAbilities[_id] = true;
+					
+					if (ability !== true)
+						isAdjusted = true;
+				}
+			else
+				isAdjusted = true;
+		}
+		
+		if (isAdjusted) {
+			Object.assign(empty(abilities), adjustedAbilities);
+			
+			return true;
+		}
+		
+		return false;
 	}
 	
 }

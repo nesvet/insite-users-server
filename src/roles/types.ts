@@ -1,10 +1,11 @@
 import { InSiteCollectionIndexes, InSiteCollectionSchema } from "insite-db";
+import { GenericAbilities } from "../abilities";
 
 
 export type RoleDoc = {
 	_id: Exclude<string, "root">;
 	involves: Exclude<string, "root">[];
-	abilities: Record<string, unknown>;
+	abilities: GenericAbilities;
 	title: string;
 	description: string;
 	createdAt: number;

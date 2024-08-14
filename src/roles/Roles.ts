@@ -190,8 +190,12 @@ export class Roles<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<str
 		
 		this.collection.ensureIndexes([ ...indexes, ...customIndexes ?? [] ]);
 		
-		for (const roleDoc of await this.collection.find().toArray())
+		for (const roleDoc of await this.collection.find().toArray()) {
+			if (this.abilitiesMap.adjust(roleDoc.abilities))
+				await this.collection.updateOne({ _id: roleDoc._id }, { $set: { abilities: roleDoc.abilities } });
+			
 			this.load(roleDoc);
+		}
 		
 		await this.update();
 		
