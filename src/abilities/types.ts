@@ -55,7 +55,9 @@ export type FlattenAbilitySchemas<A extends AbilitiesSchema> =
 	>;
 
 export type Abilities<A extends AbilitiesSchema> = {
-	login?: boolean;
+	login?: {
+		sessionsLimit: number;
+	};
 	inSite?: {
 		sections: ("users")[];
 	};

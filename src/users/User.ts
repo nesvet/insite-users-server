@@ -231,7 +231,7 @@ export class User<AS extends AbilitiesSchema = AbilitiesSchema> {
 	
 	trimSessions() {
 		
-		const sessionsLimit = ((this.abilities as { login?: { sessionsLimit: number } }).login)?.sessionsLimit ?? 0;
+		const sessionsLimit = this.abilities.login?.sessionsLimit ?? 0;
 		
 		if (this.sessions.size > sessionsLimit)
 			return this.users.sessions.collection.deleteMany({
