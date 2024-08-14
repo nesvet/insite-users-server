@@ -197,7 +197,7 @@ export class Roles<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<str
 			this.load(roleDoc);
 		}
 		
-		await this.update();
+		this.update();
 		
 		this.collection.changeListeners.add(next => {
 			switch (next.operationType) {
