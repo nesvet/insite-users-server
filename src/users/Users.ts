@@ -182,8 +182,6 @@ export class Users<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<str
 	
 	private init? = async () => {
 		
-		this.isInited = true;
-		
 		const {
 			roles: rolesOptions,
 			orgs: orgsOptions,
@@ -201,6 +199,8 @@ export class Users<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<str
 		await this.preinit!();
 		await this.orgs.init!();
 		await this.avatars.init!();
+		
+		this.isInited = true;
 		
 		this.update(true);
 		
