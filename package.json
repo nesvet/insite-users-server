@@ -1,6 +1,6 @@
 {
   "name": "insite-users-server",
-  "version": "2.0.72",
+  "version": "2.0.73",
   "description": "inSite users server side",
   "type": "module",
   "main": "./dist/index.js",
@@ -9,7 +9,7 @@
     ".": "./dist/index.js",
     "./ws": "./dist/ws.js"
   },
-  "packageManager": "bun@1.1.23",
+  "packageManager": "bun@1.1.24",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "bun .conveyer.js",
