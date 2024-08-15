@@ -32,13 +32,13 @@
     "eventemitter3": "^5.0.1",
     "insite-db": "^2",
     "insite-subscriptions-server": "^2",
-    "insite-ws-transfers": "^2"
+    "insite-ws-transfers": "^2",
+    "insite-ws": "^2"
   },
   "devDependencies": {
     "@nesvet/conveyer": "^2.2.4",
     "@nesvet/eslint-config": "^2.0.24",
     "@types/node": "^22.3.0",
-    "insite-ws": "^2",
     "typescript": "^5.5.4"
   }
 }
