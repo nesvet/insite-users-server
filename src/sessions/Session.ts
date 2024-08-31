@@ -1,4 +1,4 @@
-import type { AbilitiesSchema } from "../abilities/types";
+import type { AbilitiesSchema } from "insite-common";
 import type { User } from "../users/User";
 import type { Sessions } from "./Sessions";
 import type { SessionDoc } from "./types";

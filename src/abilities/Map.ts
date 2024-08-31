@@ -1,13 +1,11 @@
 import { empty, intersection } from "@nesvet/n";
+import type { AbilitiesSchema, AbilityParamItemSchema, AbilitySchema } from "insite-common";
 import type { User } from "../users/User";
 import type {
-	AbilitiesSchema,
 	Ability,
 	AbilityParam,
 	AbilityParamItems,
-	AbilityParamItemSchema,
 	AbilityParamNumber,
-	AbilitySchema,
 	AbilityWithParams,
 	GenericAbilities
 } from "./types";

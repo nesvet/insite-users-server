@@ -6,9 +6,9 @@ import {
 	removeAll,
 	sort
 } from "@nesvet/n";
+import type { AbilitiesSchema } from "insite-common";
 import { InSiteCollectionIndexes, InSiteWatchedCollection, newObjectIdString } from "insite-db";
 import { Users } from "../users";
-import type { AbilitiesSchema } from "../abilities/types";
 import { Org } from "./Org";
 import { basisSchema } from "./schema";
 import { OrgDoc, OrgsOptions } from "./types";

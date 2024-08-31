@@ -1,6 +1,6 @@
+import type { AbilitiesSchema } from "insite-common";
 import type { ChangeStreamDocument } from "insite-db";
 import { User } from "../users/User";
-import type { AbilitiesSchema } from "../abilities/types";
 import type { Orgs } from "./Orgs";
 import type { OrgDoc } from "./types";
 

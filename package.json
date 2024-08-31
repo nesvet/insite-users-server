@@ -33,7 +33,8 @@
     "insite-db": "^2",
     "insite-subscriptions-server": "^2",
     "insite-ws-transfers": "^2",
-    "insite-ws": "^2"
+    "insite-ws": "^2",
+    "insite-common": "^2"
   },
   "devDependencies": {
     "@nesvet/conveyer": "^2.2.4",

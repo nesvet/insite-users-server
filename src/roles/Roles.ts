@@ -6,8 +6,9 @@ import {
 	reAdd,
 	removeAll
 } from "@nesvet/n";
+import type { AbilitiesSchema } from "insite-common";
 import type { InSiteCollectionIndexes, InSiteWatchedCollection } from "insite-db";
-import type { AbilitiesSchema, GenericAbilities } from "../abilities/types";
+import type { GenericAbilities } from "../abilities/types";
 import type { Users } from "../users";
 import { Role } from "./Role";
 import { basisSchema } from "./schema";

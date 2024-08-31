@@ -1,5 +1,5 @@
+import type { AbilitiesSchema } from "insite-common";
 import { InSiteWatchedCollection } from "insite-db";
-import type { AbilitiesSchema } from "../../abilities/types";
 import type { Users } from "../Users";
 import { schema as jsonSchema } from "./schema";
 import type { AvatarDoc } from "./types";

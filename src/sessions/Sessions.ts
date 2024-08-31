@@ -1,8 +1,8 @@
 import crypto from "node:crypto";
 import { deleteProps, random, removeAll } from "@nesvet/n";
+import type { AbilitiesSchema } from "insite-common";
 import { InSiteCollectionIndexes, InSiteWatchedCollection } from "insite-db";
 import { User } from "../users/User";
-import type { AbilitiesSchema } from "../abilities/types";
 import type { Users } from "../users";
 import { basisSchema } from "./schema";
 import { Session } from "./Session";

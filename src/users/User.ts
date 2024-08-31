@@ -5,7 +5,8 @@ import {
 	hasAny,
 	removeOne
 } from "@nesvet/n";
-import type { Abilities, AbilitiesSchema, GenericAbilities } from "../abilities/types";
+import type { Abilities, AbilitiesSchema } from "insite-common";
+import type { GenericAbilities } from "../abilities/types";
 import type { Org } from "../orgs/Org";
 import type { Role } from "../roles/Role";
 import type { Session } from "../sessions/Session";

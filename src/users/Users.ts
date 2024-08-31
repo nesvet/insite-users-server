@@ -6,6 +6,7 @@ import {
 	deleteProps,
 	removeAll
 } from "@nesvet/n";
+import type { AbilitiesSchema } from "insite-common";
 import {
 	InSiteCollectionIndexes,
 	InSiteCollections,
@@ -19,7 +20,6 @@ import { Org } from "../orgs/Org";
 import { Roles } from "../roles";
 import { Sessions } from "../sessions";
 import { Session } from "../sessions/Session";
-import type { AbilitiesSchema } from "../abilities/types";
 import type { OrgsOptions } from "../orgs/types";
 import type { RolesOptions } from "../roles/types";
 import type { SessionDoc, SessionsOptions } from "../sessions/types";
