@@ -30,11 +30,11 @@
     "@nesvet/n": "^1.1.7",
     "argon2": "^0.40.3",
     "eventemitter3": "^5.0.1",
-    "insite-db": "^2",
-    "insite-subscriptions-server": "^2",
-    "insite-ws-transfers": "^2",
-    "insite-ws": "^2",
-    "insite-common": "^2"
+    "insite-common": "^2.0.0",
+    "insite-db": "^2.0.2",
+    "insite-subscriptions-server": "^2.0.9",
+    "insite-ws": "^2.0.17",
+    "insite-ws-transfers": "^2.0.10"
   },
   "devDependencies": {
     "@nesvet/conveyer": "^2.2.4",
