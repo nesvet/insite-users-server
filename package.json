@@ -32,7 +32,7 @@
     "eventemitter3": "^5.0.1",
     "insite-common": "^2.0.0",
     "insite-db": "^2.0.2",
-    "insite-subscriptions-server": "^2.0.10",
+    "insite-subscriptions-server": "^2.0.11",
     "insite-ws": "^2.0.17",
     "insite-ws-transfers": "^2.0.10"
   },
