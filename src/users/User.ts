@@ -116,7 +116,7 @@ export class User<AS extends AbilitiesSchema = AbilitiesSchema> {
 		let isOrgUpdated;
 		if (orgId !== undefined && this.org?._id !== orgId) {
 			this.org?.users.delete(this);
-			this.org = orgId && this.users.orgs.get(orgId) || this.users.orgs.null;
+			this.org = orgId && this.users.orgs.get(orgId) || this.users.orgs.null;// eslint-disable-line @stylistic/no-mixed-operators
 			this.org.users.add(this);
 			isOrgUpdated = true;
 		}
