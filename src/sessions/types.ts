@@ -10,6 +10,7 @@ export type SessionDoc = {
 	createdAt: number;
 	prolongedAt: number;
 	expiresAt: Date;
+	[customProp: string]: unknown;
 };
 
 export type SessionsOptions = {
