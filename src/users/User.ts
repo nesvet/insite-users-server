@@ -22,7 +22,7 @@ const staticUrl = process.env.INSITE_STATIC_URL ?? "http://localhost:8080";
 
 export class User<AS extends AbilitiesSchema = AbilitiesSchema> {
 	constructor(users: Users<AS>, userDoc: UserDoc) {
-		this.users = users;
+		this.#users = users;
 		
 		this._id = userDoc._id;
 		users.set(this._id, this);
@@ -49,7 +49,7 @@ export class User<AS extends AbilitiesSchema = AbilitiesSchema> {
 	avatar: null | string = null;
 	avatarUrl: null | string = null;
 	
-	private users;
+	#users;
 	
 	isUser = true;
 	isRoot?: boolean;
@@ -78,9 +78,9 @@ export class User<AS extends AbilitiesSchema = AbilitiesSchema> {
 		
 		let isEmailUpdated;
 		if (email && this.email !== email) {
-			this.users.byEmail.delete(this.email);
+			this.#users.byEmail.delete(this.email);
 			this.email = email;
-			this.users.byEmail.set(email, this);
+			this.#users.byEmail.set(email, this);
 			isEmailUpdated = true;
 		}
 		
@@ -116,7 +116,7 @@ export class User<AS extends AbilitiesSchema = AbilitiesSchema> {
 		let isOrgUpdated;
 		if (orgId !== undefined && this.org?._id !== orgId) {
 			this.org?.users.delete(this);
-			this.org = orgId && this.users.orgs.get(orgId) || this.users.orgs.null;// eslint-disable-line @stylistic/no-mixed-operators
+			this.org = orgId && this.#users.orgs.get(orgId) || this.#users.orgs.null;// eslint-disable-line @stylistic/no-mixed-operators
 			this.org.users.add(this);
 			isOrgUpdated = true;
 		}
@@ -130,26 +130,26 @@ export class User<AS extends AbilitiesSchema = AbilitiesSchema> {
 			this.updatePermissions();
 			
 			if (isLastNameUpdated)
-				this.users.isSortRequired = true;
+				this.#users.isSortRequired = true;
 			
-			if (this.users.isInited)
-				this.users.updateDebounced();
+			if (this.#users.isInited)
+				this.#users.updateDebounced();
 			
 		} else if (isLastNameUpdated)
-			this.users.sortDebounced();
+			this.#users.sortDebounced();
 		
 	}
 	
 	updateRoles() {
 		
-		if (this.users.isInited) {
+		if (this.#users.isInited) {
 			this.ownRoles = [];
 			this.roles.clear();
 			this.slaveRoles.clear();
 			empty(this.abilities);
 			
 			for (const roleId of this.ownRoleIds) {
-				const role = this.users.roles.get(roleId);
+				const role = this.#users.roles.get(roleId);
 				if (role) {
 					
 					this.ownRoles.push(role);
@@ -161,11 +161,11 @@ export class User<AS extends AbilitiesSchema = AbilitiesSchema> {
 					
 					this.slaveRoleIds = _ids(this.slaveRoles);
 					
-					this.users.abilitiesMap.merge(this.abilities as GenericAbilities, role.abilities as GenericAbilities);
+					this.#users.abilitiesMap.merge(this.abilities as GenericAbilities, role.abilities as GenericAbilities);
 				}
 			}
 			
-			if (this.roles.has(this.users.roles.root))
+			if (this.roles.has(this.#users.roles.root))
 				this.isRoot = true;
 			
 			this.trimSessions();
@@ -175,13 +175,13 @@ export class User<AS extends AbilitiesSchema = AbilitiesSchema> {
 	
 	updatePermissions() {
 		
-		if (this.users.isInited) {
+		if (this.#users.isInited) {
 			this.slaveOrgs.clear();
 			this.slaveUsers.clear();
 			this.slaves.clear();
 			const slaveIds = new Set<string>();
 			
-			for (const org of this.users.orgs.sorted)
+			for (const org of this.#users.orgs.sorted)
 				if ((org.ownerUsers.has(this) || this.isRoot) && !this.slaveOrgs.has(org)) {
 					this.slaveOrgs.add(org);
 					this.slaves.add(org);
@@ -193,7 +193,7 @@ export class User<AS extends AbilitiesSchema = AbilitiesSchema> {
 					}
 				}
 			
-			for (const org of new Set([ this.org, ...this.slaveOrgs, this.users.orgs.null ]))
+			for (const org of new Set([ this.org, ...this.slaveOrgs, this.#users.orgs.null ]))
 				for (const user of org.users)
 					if (user !== this && (hasAny(this.slaveRoles, user.ownRoles) || !user.ownRoles.length)) {
 						this.slaveUsers.add(user);
@@ -224,7 +224,7 @@ export class User<AS extends AbilitiesSchema = AbilitiesSchema> {
 			if (snapshot !== permissionsSnapshots.get(this._id)) {
 				permissionsSnapshots.set(this._id, snapshot);
 				
-				this.users.emit("user-permissions-change", this);
+				this.#users.emit("user-permissions-change", this);
 			}
 		}
 		
@@ -235,7 +235,7 @@ export class User<AS extends AbilitiesSchema = AbilitiesSchema> {
 		const sessionsLimit = this.abilities.login?.sessionsLimit ?? 0;
 		
 		if (this.sessions.size > sessionsLimit)
-			return this.users.sessions.collection.deleteMany({
+			return this.#users.sessions.collection.deleteMany({
 				_id: {
 					$in: _ids(
 						[ ...this.sessions ]
@@ -260,7 +260,7 @@ export class User<AS extends AbilitiesSchema = AbilitiesSchema> {
 		
 		if (this.isOnline !== isOnline) {
 			this.isOnline = isOnline;
-			this.users.emit("user-is-online", this);
+			this.#users.emit("user-is-online", this);
 		}
 		
 	}, 500);
@@ -269,16 +269,16 @@ export class User<AS extends AbilitiesSchema = AbilitiesSchema> {
 		
 		this.org.users.delete(this);
 		
-		this.users.delete(this._id);
-		this.users.byEmail.delete(this.email);
-		removeOne(this.users.sorted, this);
+		this.#users.delete(this._id);
+		this.#users.byEmail.delete(this.email);
+		removeOne(this.#users.sorted, this);
 		
 		rolesSnapshots.delete(this._id);
 		permissionsSnapshots.delete(this._id);
 		
-		this.users.replace(this._id);
+		this.#users.replace(this._id);
 		
-		this.users.updateDebounced();
+		this.#users.updateDebounced();
 		
 	}
 	

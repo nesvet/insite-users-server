@@ -8,7 +8,7 @@ const snapshots = new Map();
 
 export class Role<AS extends AbilitiesSchema = AbilitiesSchema> {
 	constructor(roles: Roles<AS>, roleDoc: RoleDoc) {
-		this.roles = roles;
+		this.#roles = roles;
 		
 		this._id = roleDoc._id;
 		roles.set(this._id, this);
@@ -17,7 +17,7 @@ export class Role<AS extends AbilitiesSchema = AbilitiesSchema> {
 		
 	}
 	
-	private roles;
+	#roles;
 	
 	_id;
 	ownInvolveIds!: string[];
@@ -56,10 +56,10 @@ export class Role<AS extends AbilitiesSchema = AbilitiesSchema> {
 			if (snapshot !== snapshots.get(this._id)) {
 				snapshots.set(this._id, snapshot);
 				
-				if (this.roles.users.isInited)
-					this.roles.updateDebounced();
+				if (this.#roles.users.isInited)
+					this.#roles.updateDebounced();
 				
-				this.roles.users.emit("roles-role-update", this, next);
+				this.#roles.users.emit("roles-role-update", this, next);
 			}
 		}
 		
@@ -67,11 +67,11 @@ export class Role<AS extends AbilitiesSchema = AbilitiesSchema> {
 	
 	delete() {
 		
-		this.roles.delete(this._id);
+		this.#roles.delete(this._id);
 		
 		snapshots.delete(this._id);
 		
-		this.roles.updateDebounced();
+		this.#roles.updateDebounced();
 		
 	}
 	

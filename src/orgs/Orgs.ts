@@ -36,7 +36,7 @@ export class Orgs<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<stri
 	
 	users;
 	collections;
-	preinitOptions?;
+	private preinitOptions?;
 	
 	collection!: {
 		/** @deprecated Direct usage of roles collection.deleteOne is forbidden. Use orgs.collectionDelete instead. */
@@ -53,11 +53,11 @@ export class Orgs<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<stri
 		
 	}
 	
-	private resolve(org: Org<AS>, slaveOrgs: Org<AS>[]) {
+	#resolve(org: Org<AS>, slaveOrgs: Org<AS>[]) {
 		slaveOrgs = [ org, ...slaveOrgs ];
 		
 		for (const ownerOrg of org.ownerOrgs) {
-			this.resolve(ownerOrg, slaveOrgs);
+			this.#resolve(ownerOrg, slaveOrgs);
 			for (const slaveOrg of slaveOrgs)
 				ownerOrg.slaveOrgs.add(slaveOrg);
 		}
@@ -93,11 +93,11 @@ export class Orgs<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<stri
 		
 		for (const org of array)
 			if (!array.some(anotherOrg => anotherOrg.ownerOrgs.has(org)))
-				this.resolve(org, []);
+				this.#resolve(org, []);
 		
-		sorted.sort(this.sortOrgs);
+		sorted.sort(this.#sortOrgs);
 		for (const org of array)
-			sort(org.slaveOrgs, this.sortOrgs);
+			sort(org.slaveOrgs, this.#sortOrgs);
 		
 		for (let i = 0; i < sorted.length; i++) {
 			const org = sorted[i];
@@ -125,7 +125,7 @@ export class Orgs<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<stri
 		
 	}
 	
-	private sortOrgs(a: Org<AS>, b: Org<AS>) {
+	#sortOrgs(a: Org<AS>, b: Org<AS>) {
 		return (
 			(b.slaveOrgs.size - a.slaveOrgs.size) || (
 				a.title > b.title ?

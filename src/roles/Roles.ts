@@ -63,7 +63,7 @@ export class Roles<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<str
 	
 	abilitiesMap;
 	root;
-	initOptions?;
+	private initOptions?;
 	
 	load(roleDoc: RoleDoc) {
 		new Role<AS>(this, roleDoc);
@@ -89,7 +89,7 @@ export class Roles<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<str
 	
 	sorted: Role<AS>[] = [];
 	
-	private sortRoles(a: Role<AS>, b: Role<AS>) {
+	#sortRoles(a: Role<AS>, b: Role<AS>) {
 		return (
 			(b.involves.size - a.involves.size) || (
 				(a.title && b.title) ?
@@ -125,7 +125,7 @@ export class Roles<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<str
 		this.resolve(this.root, []);
 		
 		for (const role of array)
-			role.ownInvolves = getAll(this, role.ownInvolveIds, true).sort(this.sortRoles).reverse();
+			role.ownInvolves = getAll(this, role.ownInvolveIds, true).sort(this.#sortRoles).reverse();
 		
 		const sorted = [ this.root ];
 		

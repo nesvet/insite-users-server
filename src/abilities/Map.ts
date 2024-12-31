@@ -30,17 +30,17 @@ export class AbilitiesMap<AS extends AbilitiesSchema = AbilitiesSchema> extends 
 		
 		this.schema = schema;
 		
-		this.parse(this.schema);
+		this.#parse(this.schema);
 		
 	}
 	
 	schema;
 	
-	private parse(list: AbilitiesSchema) {
+	#parse(list: AbilitiesSchema) {
 		for (const ability of list) {
 			this.set(ability._id, ability);
 			if (ability.subAbilities)
-				this.parse(ability.subAbilities);
+				this.#parse(ability.subAbilities);
 		}
 		
 	}

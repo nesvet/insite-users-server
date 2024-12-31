@@ -30,7 +30,7 @@ export class Sessions<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<
 	users;
 	collections;
 	
-	initOptions?;
+	private initOptions?;
 	
 	collection!: {
 		expireAfterSeconds: number;

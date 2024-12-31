@@ -9,15 +9,15 @@ export class Session<AS extends AbilitiesSchema = AbilitiesSchema> {
 		const user = sessions.users.get(sessionDoc.user);
 		
 		if (user) {
-			this.sessions = sessions;
+			this.#sessions = sessions;
 			
 			this._id = sessionDoc._id;
-			this.sessions.set(this._id, this);
+			this.#sessions.set(this._id, this);
 			
 			this.user = user;
 			this.user.sessions.add(this);
 			
-			this.sessions.users.bySessionId.set(this._id, this.user);
+			this.#sessions.users.bySessionId.set(this._id, this.user);
 			
 			this.update(sessionDoc);
 		} else
@@ -35,14 +35,14 @@ export class Session<AS extends AbilitiesSchema = AbilitiesSchema> {
 	prolongedAt!: number;
 	expiresAt!: Date;
 	
-	private sessions!: Sessions<AS>;
+	#sessions!: Sessions<AS>;
 	
 	update({ _id, user, isOnline, ...restProps }: Partial<SessionDoc>) {
 		
 		if (isOnline !== undefined && this.isOnline !== isOnline) {
 			this.isOnline = isOnline;
 			
-			if (this.sessions.isInited && this.user.isOnline !== this.isOnline)
+			if (this.#sessions.isInited && this.user.isOnline !== this.isOnline)
 				this.user.updateIsOnline();
 		}
 		
@@ -55,11 +55,11 @@ export class Session<AS extends AbilitiesSchema = AbilitiesSchema> {
 		const ts = Date.now();
 		
 		updates.prolongedAt = ts;
-		updates.expiresAt = new Date(ts + (this.sessions.collection.expireAfterSeconds * 1000));
+		updates.expiresAt = new Date(ts + (this.#sessions.collection.expireAfterSeconds * 1000));
 		
 		this.update(updates);
 		
-		return this.sessions.collection.updateOne({ _id: this._id }, { $set: updates });
+		return this.#sessions.collection.updateOne({ _id: this._id }, { $set: updates });
 	}
 	
 	offline() {
@@ -68,16 +68,16 @@ export class Session<AS extends AbilitiesSchema = AbilitiesSchema> {
 		
 		this.update(updates);
 		
-		return this.sessions.collection.updateOne({ _id: this._id }, { $set: updates });
+		return this.#sessions.collection.updateOne({ _id: this._id }, { $set: updates });
 	}
 	
 	delete() {
 		
-		this.sessions.delete(this._id);
+		this.#sessions.delete(this._id);
 		this.user.sessions.delete(this);
-		this.sessions.users.bySessionId.delete(this._id);
+		this.#sessions.users.bySessionId.delete(this._id);
 		
-		this.sessions.users.emit("session-delete", this);
+		this.#sessions.users.emit("session-delete", this);
 		
 		if (this.isOnline)
 			this.user.updateIsOnline();
