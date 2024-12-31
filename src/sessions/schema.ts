@@ -41,6 +41,5 @@ export const basisSchema: InSiteCollectionSchema = {
 		expiresAt: {
 			bsonType: "date"
 		}
-	},
-	additionalProperties: false
+	}
 };
