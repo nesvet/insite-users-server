@@ -99,7 +99,7 @@ export class AbilitiesMap<AS extends AbilitiesSchema = AbilitiesSchema> extends 
 				const ability: Ability = {};
 				for (const param of schema.params)
 					if (param.type === "number")
-						ability[param._id] = param.max ?? 0;
+						ability[param._id] = param.max ?? Infinity;
 					else if (param.type === "items")
 						ability[param._id] = param.items.map(item => item._id);
 				
