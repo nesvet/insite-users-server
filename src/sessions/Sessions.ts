@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { deleteProps, random, removeAll } from "@nesvet/n";
 import type { AbilitiesSchema } from "insite-common";
-import { InSiteCollectionIndexes, InSiteWatchedCollection } from "insite-db";
+import { InSiteCollectionIndexes, InSiteWatchedCollection, MongoWriteConcernError } from "insite-db";
 import { User } from "../users/User";
 import type { Users } from "../users";
 import { basisSchema } from "./schema";
@@ -148,10 +148,9 @@ export class Sessions<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<
 		} catch (error) {
 			console.log("🔵 🔵 🔵 🔵 🔵 🔵 🔵 sessionDoc 🔵 🔵 🔵 🔵 🔵 🔵 🔵");
 			console.log(JSON.stringify(sessionDoc, null, "  "), "\n");
-			
-			if (error.errorResponse?.errmsg === "Document failed validation") {
+			if (error instanceof MongoWriteConcernError && error.errorResponse?.errmsg === "Document failed validation") {
 				console.error("⭕️ ⭕️ ⭕️ ⭕️ ⭕️ ⭕️ ⭕️", error.errorResponse.errmsg, "⭕️ ⭕️ ⭕️ ⭕️ ⭕️ ⭕️ ⭕️");
-				console.log(JSON.stringify(error.errorResponse.errInfo.details.schemaRulesNotSatisfied, null, "  "));
+				console.log(JSON.stringify(error.errorResponse.errInfo?.details.schemaRulesNotSatisfied, null, "  "));
 			} else
 				console.error(error);
 		}
