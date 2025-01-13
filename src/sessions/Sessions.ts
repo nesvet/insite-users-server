@@ -74,6 +74,9 @@ export class Sessions<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<
 			properties: { ...basisSchema.properties, ...customSchema?.properties }
 		};
 		
+		console.log("🟣 🟣 🟣 🟣 🟣 🟣 🟣 sessions collection jsonSchema 🟣 🟣 🟣 🟣 🟣 🟣 🟣");
+		console.log(JSON.stringify(jsonSchema, null, "  "));
+		
 		this.collection = Object.assign(
 			await this.collections.ensure<SessionDoc>("sessions", { jsonSchema }),
 			{
@@ -138,7 +141,20 @@ export class Sessions<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<
 		/* new Session(…) before await insertOne(…) for avoid changeStream insert event to come earlier and create the session duplicate */
 		const session = new Session<AS>(this, sessionDoc);
 		
-		await this.collection.insertOne(sessionDoc);
+		
+		
+		try {
+			await this.collection.insertOne(sessionDoc);
+		} catch (error) {
+			console.log("🔵 🔵 🔵 🔵 🔵 🔵 🔵 sessionDoc 🔵 🔵 🔵 🔵 🔵 🔵 🔵");
+			console.log(JSON.stringify(sessionDoc, null, "  "), "\n");
+			
+			if (error.errorResponse?.errmsg === "Document failed validation") {
+				console.error("⭕️ ⭕️ ⭕️ ⭕️ ⭕️ ⭕️ ⭕️", error.errorResponse.errmsg, "⭕️ ⭕️ ⭕️ ⭕️ ⭕️ ⭕️ ⭕️");
+				console.log(JSON.stringify(error.errorResponse.errInfo.details.schemaRulesNotSatisfied, null, "  "));
+			} else
+				console.error(error);
+		}
 		
 		return session;
 	}
