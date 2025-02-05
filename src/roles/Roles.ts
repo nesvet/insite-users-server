@@ -8,7 +8,7 @@ import {
 } from "@nesvet/n";
 import type { AbilitiesSchema } from "insite-common";
 import type { InSiteCollectionIndexes, InSiteWatchedCollection } from "insite-db";
-import type { GenericAbilities } from "../abilities/types";
+import type { AbilityParam, GenericAbilities } from "../abilities/types";
 import type { Users } from "../users";
 import { Role } from "./Role";
 import { basisSchema } from "./schema";
@@ -24,7 +24,7 @@ function preventDirectDelete() {
 }
 
 
-export class Roles<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<string, Role<AS>> {
+export class Roles<AS extends AbilitiesSchema> extends Map<string, Role<AS>> {
 	constructor(users: Users<AS>, options: RolesOptions = {}) {
 		super();
 		
@@ -35,13 +35,13 @@ export class Roles<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<str
 		
 		this.users = users;
 		this.collections = users.collections;
-		this.abilitiesMap = users.abilitiesMap;
+		this.abilities = users.abilities;
 		
 		this.root = new Role<AS>(this, {
 			...rootProps,
 			_id: "root",
 			involves: [],
-			abilities: this.abilitiesMap.getMaximum(),
+			abilities: this.abilities.getDefaultAbilities(),
 			title: "Root",
 			description: "Root",
 			createdAt: Date.now()
@@ -61,7 +61,7 @@ export class Roles<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<str
 		deleteMany: typeof preventDirectDelete;
 	} & InSiteWatchedCollection<RoleDoc>;
 	
-	abilitiesMap;
+	abilities;
 	root;
 	private initOptions?;
 	
@@ -78,7 +78,7 @@ export class Roles<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<str
 			if (involvedRole) {
 				for (const involvedByRole of involvedBy) {
 					reAdd(involvedByRole.involves, involvedRole);
-					this.abilitiesMap.merge(involvedByRole.inheritedAbilities as GenericAbilities, involvedRole.abilities as GenericAbilities);
+					this.abilities.merge(involvedByRole.inheritedAbilities as GenericAbilities, involvedRole.abilities as GenericAbilities);
 				}
 				if (involvedRole !== role)
 					this.resolve(involvedRole, involvedBy);
@@ -143,7 +143,7 @@ export class Roles<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<str
 		
 		let _o = 0;
 		for (const role of sorted) {
-			this.abilitiesMap.merge(role.abilities as GenericAbilities, role.inheritedAbilities as GenericAbilities);
+			this.abilities.merge(role.abilities as GenericAbilities, role.inheritedAbilities as GenericAbilities);
 			role._o = _o++;
 		}
 		

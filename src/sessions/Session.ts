@@ -4,7 +4,7 @@ import type { Sessions } from "./Sessions";
 import type { SessionDoc } from "./types";
 
 
-export class Session<AS extends AbilitiesSchema = AbilitiesSchema> {
+export class Session<AS extends AbilitiesSchema> {
 	constructor(sessions: Sessions<AS>, sessionDoc: SessionDoc) {
 		const user = sessions.users.get(sessionDoc.user);
 		

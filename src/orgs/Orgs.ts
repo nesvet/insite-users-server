@@ -23,7 +23,7 @@ function preventDirectDelete() {
 }
 
 
-export class Orgs<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<string, Org<AS>> {
+export class Orgs<AS extends AbilitiesSchema> extends Map<string, Org<AS>> {
 	constructor(users: Users<AS>, options: OrgsOptions = {}) {
 		super();
 		

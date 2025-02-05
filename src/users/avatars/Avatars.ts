@@ -6,7 +6,7 @@ import type { AvatarDoc } from "./types";
 // import { AvatarsOptions } from "./types";
 
 
-export class Avatars<AS extends AbilitiesSchema = AbilitiesSchema> {
+export class Avatars<AS extends AbilitiesSchema> {
 	constructor(users: Users<AS>/* , options: AvatarsOptions = {} */) {
 		this.users = users;
 		this.collections = users.collections;

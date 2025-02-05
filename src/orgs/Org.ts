@@ -7,7 +7,7 @@ import type { OrgDoc } from "./types";
 const snapshots = new Map();
 
 
-export class Org<AS extends AbilitiesSchema = AbilitiesSchema> {
+export class Org<AS extends AbilitiesSchema> {
 	constructor(orgs: Orgs<AS>, orgDoc: OrgDoc) {
 		this.orgs = orgs;
 		

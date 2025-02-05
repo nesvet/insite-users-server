@@ -6,7 +6,7 @@ import { RoleDoc } from "./types";
 const snapshots = new Map();
 
 
-export class Role<AS extends AbilitiesSchema = AbilitiesSchema> {
+export class Role<AS extends AbilitiesSchema> {
 	constructor(roles: Roles<AS>, roleDoc: RoleDoc) {
 		this.#roles = roles;
 		

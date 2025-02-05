@@ -47,7 +47,7 @@ export type Options<AS> = {
 };
 
 
-export class Users<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<string, User<AS>> {
+export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 	constructor(collections: InSiteCollections, options: Options<AS>) {
 		super();
 		
@@ -66,7 +66,7 @@ export class Users<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<str
 		
 		this.collections = collections;
 		
-		this.abilitiesMap = new AbilitiesMap<AS>(options.abilities);
+		this.abilities = new AbilitiesMap<AS>(options.abilities);
 		
 		this.initOptions = options;
 		
@@ -86,7 +86,7 @@ export class Users<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<str
 	private initOptions?;
 	
 	collections;
-	abilitiesMap;
+	abilities;
 	
 	collection!: InSiteWatchedCollection<UserDoc>;
 	roles!: Roles<AS>;

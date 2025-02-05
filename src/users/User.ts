@@ -20,7 +20,7 @@ const permissionsSnapshots = new Map();
 const staticUrl = process.env.INSITE_STATIC_URL ?? "http://localhost:8080";
 
 
-export class User<AS extends AbilitiesSchema = AbilitiesSchema> {
+export class User<AS extends AbilitiesSchema> {
 	constructor(users: Users<AS>, userDoc: UserDoc) {
 		this.#users = users;
 		
@@ -161,7 +161,7 @@ export class User<AS extends AbilitiesSchema = AbilitiesSchema> {
 					
 					this.slaveRoleIds = _ids(this.slaveRoles);
 					
-					this.#users.abilitiesMap.merge(this.abilities as GenericAbilities, role.abilities as GenericAbilities);
+					this.#users.abilities.merge(this.abilities as GenericAbilities, role.abilities as GenericAbilities);
 				}
 			}
 			

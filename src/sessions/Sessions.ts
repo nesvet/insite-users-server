@@ -17,7 +17,7 @@ const indexes: InSiteCollectionIndexes = [
 ];
 
 
-export class Sessions<AS extends AbilitiesSchema = AbilitiesSchema> extends Map<string, Session<AS>> {
+export class Sessions<AS extends AbilitiesSchema> extends Map<string, Session<AS>> {
 	constructor(users: Users<AS>, options: SessionsOptions = {}) {
 		super();
 		
