@@ -5,6 +5,9 @@
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
+  "imports": {
+    "#lib": "./src/lib/index.js"
+  },
   "exports": {
     ".": "./dist/index.js",
     "./ws": "./dist/ws.js"
