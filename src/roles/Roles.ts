@@ -20,7 +20,7 @@ const indexes: InSiteCollectionIndexes = [
 ];
 
 function preventDirectDelete() {
-	throw new Error("Direct usage of roles collection.deleteOne or .deleteMany is forbidden. Use roles.collectionDelete instead.");
+	throw new Error("Direct usage of roles collection.deleteOne or .deleteMany is forbidden. Use roles.deleteRole instead.");
 }
 
 
@@ -53,17 +53,90 @@ export class Roles<AS extends AbilitiesSchema> extends Map<string, Role<AS>> {
 	
 	users;
 	collections;
-	collection!: {
-		/** @deprecated Direct usage of roles collection.deleteOne is forbidden. Use roles.collectionDelete instead. */
+	collection!: InSiteWatchedCollection<RoleDoc> & {
+		/** @deprecated Direct usage of roles collection.deleteOne is forbidden. Use roles.deleteRole instead. */
 		deleteOne: typeof preventDirectDelete;
 		
-		/** @deprecated Direct usage of roles collection.deleteMany is forbidden. Use roles.collectionDelete instead. */
+		/** @deprecated Direct usage of roles collection.deleteMany is forbidden. Use roles.deleteRole instead. */
 		deleteMany: typeof preventDirectDelete;
-	} & InSiteWatchedCollection<RoleDoc>;
+	};
 	
 	abilities;
 	root;
 	private initOptions?;
+	
+	#isInited = false;
+	
+	async init() {
+		
+		if (!this.#isInited) {
+			this.#isInited = true;
+			
+			const {
+				schema: customSchema,
+				indexes: customIndexes
+			} = this.initOptions!;
+			
+			if (customSchema) {
+				if (customSchema.required)
+					removeAll(customSchema.required as string[], basisSchema.required as string[]);
+				if (customSchema.properties)
+					deleteProps(customSchema, Object.keys(basisSchema.properties!));
+			}
+			
+			const jsonSchema = {
+				...basisSchema,
+				...customSchema,
+				required: [ ...basisSchema.required as string[], ...customSchema?.required as string[] ?? [] ],
+				properties: { ...basisSchema.properties, ...customSchema?.properties }
+			};
+			
+			this.collection = Object.assign(
+				await this.collections.ensure<RoleDoc>("roles", { jsonSchema }),
+				{
+					deleteOne: preventDirectDelete,
+					deleteMany: preventDirectDelete
+				}
+			);
+			
+			this.collection.ensureIndexes([ ...indexes, ...customIndexes ?? [] ]);
+			
+			for (const roleDoc of await this.collection.find().toArray()) {
+				if (this.abilities.adjust(roleDoc.abilities))
+					await this.collection.updateOne({ _id: roleDoc._id }, { $set: { abilities: roleDoc.abilities } });
+				
+				this.load(roleDoc);
+			}
+			
+			this.update();
+			
+			this.collection.changeListeners.add(next => {
+				switch (next.operationType) {
+					case "insert": {
+						const role = new Role<AS>(this, next.fullDocument);
+						this.users.emit("roles-role-update", role, next);
+						break;
+					}
+					
+					case "replace":
+						this.get(next.documentKey._id)?.update(next.fullDocument, next);
+						break;
+					
+					case "update":
+						this.get(next.documentKey._id)?.update(next.updateDescription.updatedFields!, next);
+						break;
+					
+					case "delete":
+						this.get(next.documentKey._id)?.delete();
+						this.users.emit("roles-role-update", null, next);
+				}
+				
+			});
+			
+			delete this.initOptions;
+		}
+		
+	}
 	
 	load(roleDoc: RoleDoc) {
 		new Role<AS>(this, roleDoc);
@@ -103,7 +176,6 @@ export class Roles<AS extends AbilitiesSchema> extends Map<string, Role<AS>> {
 								a._id < b._id ?
 									-1 :
 									0
-				
 			)
 		);
 	}
@@ -158,77 +230,9 @@ export class Roles<AS extends AbilitiesSchema> extends Map<string, Role<AS>> {
 		
 	}
 	
-	updateDebounced = debounce(this.update, 250);
+	updateDebounced = debounce(this.update, 100);
 	
-	init? = async () => {
-		
-		const {
-			schema: customSchema,
-			indexes: customIndexes
-		} = this.initOptions!;
-		
-		if (customSchema) {
-			if (customSchema.required)
-				removeAll(customSchema.required as string[], basisSchema.required as string[]);
-			if (customSchema.properties)
-				deleteProps(customSchema, Object.keys(basisSchema.properties!));
-		}
-		
-		const jsonSchema = {
-			...basisSchema,
-			...customSchema,
-			required: [ ...basisSchema.required as string[], ...customSchema?.required as string[] ?? [] ],
-			properties: { ...basisSchema.properties, ...customSchema?.properties }
-		};
-		
-		this.collection = Object.assign(
-			await this.collections.ensure<RoleDoc>("roles", { jsonSchema }),
-			{
-				deleteOne: preventDirectDelete,
-				deleteMany: preventDirectDelete
-			}
-		);
-		
-		this.collection.ensureIndexes([ ...indexes, ...customIndexes ?? [] ]);
-		
-		for (const roleDoc of await this.collection.find().toArray()) {
-			if (this.abilitiesMap.adjust(roleDoc.abilities))
-				await this.collection.updateOne({ _id: roleDoc._id }, { $set: { abilities: roleDoc.abilities } });
-			
-			this.load(roleDoc);
-		}
-		
-		this.update();
-		
-		this.collection.changeListeners.add(next => {
-			switch (next.operationType) {
-				case "insert": {
-					const role = new Role<AS>(this, next.fullDocument);
-					this.users.emit("roles-role-update", role, next);
-					break;
-				}
-				
-				case "replace":
-					this.get(next.documentKey._id)?.update(next.fullDocument, next);
-					break;
-				
-				case "update":
-					this.get(next.documentKey._id)?.update(next.updateDescription.updatedFields!, next);
-					break;
-				
-				case "delete":
-					this.get(next.documentKey._id)?.delete();
-					this.users.emit("roles-role-update", null, next);
-			}
-			
-		});
-		
-		delete this.initOptions;
-		delete this.init;
-		
-	};
-	
-	new({ _id, involves, title, description, ...restProps }: Omit<RoleDoc, "abilities" | "createdAt">) {
+	create({ _id, involves, title, description, ...restProps }: Omit<RoleDoc, "abilities" | "createdAt">) {
 		return this.collection.insertOne({
 			_id,
 			involves: involves || [],
@@ -240,7 +244,28 @@ export class Roles<AS extends AbilitiesSchema> extends Map<string, Role<AS>> {
 		});
 	}
 	
-	collectionDelete(role: Role<AS> | string) {
+	async updateRole(roleId: string, updates: Omit<RoleDoc, "abilities" | "createdAt">) {
+		const role = this.get(roleId);
+		
+		if (!role)
+			return false;
+		
+		if (updates.involves) {
+			removeAll(updates.involves, [ roleId ]);
+			
+			for (const involvedRoleId of updates.involves)
+				if (this.get(involvedRoleId)?.involves.has(role))
+					removeAll(updates.involves, [ involvedRoleId ]);
+			
+			updates.involves = this.cleanUpIds(updates.involves);
+		}
+		
+		await this.collection.updateOne({ _id: roleId }, { $set: updates });
+		
+		return true;
+	}
+	
+	deleteRole(role: Role<AS> | string) {
 		const _id = typeof role == "string" ? role : role._id;
 		
 		return this.collection.bulkWrite([
@@ -259,6 +284,35 @@ export class Roles<AS extends AbilitiesSchema> extends Map<string, Role<AS>> {
 				cleanedUpIds.push(role._id);
 		
 		return cleanedUpIds;
+	}
+	
+	async setAbility(roleId: string, abilityLongId: string, set: boolean) {
+		const role = this.get(roleId);
+		
+		if (!role)
+			return false;
+		
+		await this.collection.updateOne({ _id: roleId }, { $set: {
+			abilities:
+				set ?
+					this.abilities.setAbility(role.ownAbilities, abilityLongId) :
+					this.abilities.unsetAbility(role.ownAbilities, abilityLongId)
+		} });
+		
+		return true;
+	}
+	
+	async setAbilityParam(roleId: string, abilityLongId: string, paramId: string, value: AbilityParam) {
+		const role = this.get(roleId);
+		
+		if (!role)
+			return false;
+		
+		await this.collection.updateOne({ _id: roleId }, { $set: {
+			abilities: this.abilities.setParam(role.ownAbilities, abilityLongId, paramId, value)
+		} });
+		
+		return true;
 	}
 	
 }

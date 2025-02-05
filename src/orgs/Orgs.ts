@@ -1,17 +1,20 @@
 import {
+	_ids,
 	debounce,
 	deleteProps,
 	EmptyArray,
 	EmptySet,
 	removeAll,
-	sort
+	sort,
+	union,
+	without
 } from "@nesvet/n";
 import type { AbilitiesSchema } from "insite-common";
 import { InSiteCollectionIndexes, InSiteWatchedCollection, newObjectIdString } from "insite-db";
-import { Users } from "../users";
+import type { User, Users } from "../users";
 import { Org } from "./Org";
 import { basisSchema } from "./schema";
-import { OrgDoc, OrgsOptions } from "./types";
+import type { OrgDoc, OrgsOptions } from "./types";
 
 
 const indexes: InSiteCollectionIndexes = [
@@ -19,7 +22,7 @@ const indexes: InSiteCollectionIndexes = [
 ];
 
 function preventDirectDelete() {
-	throw new Error("Direct usage of orgs collection.deleteOne or .deleteMany is forbidden. Use orgs.collectionDelete instead.");
+	throw new Error("Direct usage of orgs collection.deleteOne or .deleteMany is forbidden. Use orgs.deleteOrg instead.");
 }
 
 
@@ -38,15 +41,113 @@ export class Orgs<AS extends AbilitiesSchema> extends Map<string, Org<AS>> {
 	collections;
 	private preinitOptions?;
 	
-	collection!: {
-		/** @deprecated Direct usage of roles collection.deleteOne is forbidden. Use orgs.collectionDelete instead. */
+	collection!: InSiteWatchedCollection<OrgDoc> & {
+		/** @deprecated Direct usage of roles collection.deleteOne is forbidden. Use orgs.deleteOrg instead. */
 		deleteOne: typeof preventDirectDelete;
 		
-		/** @deprecated Direct usage of roles collection.deleteMany is forbidden. Use orgs.collectionDelete instead. */
+		/** @deprecated Direct usage of roles collection.deleteMany is forbidden. Use orgs.deleteOrg instead. */
 		deleteMany: typeof preventDirectDelete;
-	} & InSiteWatchedCollection<OrgDoc>;
+	};
 	
-	null!: { _id: null } & Org<AS>;
+	null!: Org<AS> & { _id: null };
+	
+	#isPreinited = false;
+	
+	async preinit() {
+		
+		if (!this.#isPreinited) {
+			this.#isPreinited = true;
+			
+			const {
+				schema: customSchema,
+				indexes: customIndexes,
+				null: nullProps
+			} = this.preinitOptions!;
+			
+			if (customSchema) {
+				if (customSchema.required)
+					removeAll(customSchema.required as string [], basisSchema.required as string[]);
+				if (customSchema.properties)
+					deleteProps(customSchema, Object.keys(basisSchema.properties!));
+			}
+			
+			const jsonSchema = {
+				...basisSchema,
+				...customSchema,
+				required: [ ...basisSchema.required as string[], ...customSchema?.required as string[] ?? [] ],
+				properties: { ...basisSchema.properties, ...customSchema?.properties }
+			};
+			
+			this.collection = Object.assign(
+				await this.collections.ensure<OrgDoc>("orgs", { jsonSchema }),
+				{
+					deleteOne: preventDirectDelete,
+					deleteMany: preventDirectDelete
+				}
+			);
+			
+			this.collection.ensureIndexes([ ...indexes, ...customIndexes ?? [] ]);
+			
+			this.null = Object.assign(
+				new Org<AS>(this, {
+					...nullProps,
+					_id: "",
+					title: "",
+					note: "",
+					owners: [],
+					createdAt: Date.now()
+				}),
+				{
+					_id: null,
+					ownerIds: new EmptyArray(),
+					ownerOrgs: new EmptySet(),
+					ownerUsers: new EmptySet(),
+					slaveOrgs: new EmptySet()
+				}
+			);
+			
+			for (const orgDoc of await this.collection.find().toArray())
+				this.load(orgDoc);
+			
+			delete this.preinitOptions;
+		}
+		
+	}
+	
+	#isInited = false;
+	
+	init() {
+		
+		if (!this.#isInited) {
+			this.#isInited = true;
+			
+			this.update();
+			
+			this.collection.changeListeners.add(next => {
+				switch (next.operationType) {
+					case "insert": {
+						const org = new Org<AS>(this, next.fullDocument);
+						this.users.emit("orgs-org-update", org, next);
+						break;
+					}
+					
+					case "replace":
+						this.get(next.documentKey._id)?.update(next.fullDocument, next);
+						break;
+					
+					case "update":
+						this.get(next.documentKey._id)?.update(next.updateDescription.updatedFields!, next);
+						break;
+					
+					case "delete":
+						this.get(next.documentKey._id)?.delete();
+						this.users.emit("orgs-org-update", null, next);
+				}
+				
+			});
+		}
+		
+	}
 	
 	load(orgDoc: OrgDoc) {
 		new Org<AS>(this, orgDoc);
@@ -111,7 +212,7 @@ export class Orgs<AS extends AbilitiesSchema> extends Map<string, Org<AS>> {
 					sorted.splice(i + 1, 0, slaveOrg);
 				}
 		}
-		for (let { length } = sorted, o = 0; o < length;)
+		for (let o = 0, { length } = sorted; o < length;)
 			sorted[o]._o = o++;
 		
 		this.sorted = sorted;
@@ -139,96 +240,7 @@ export class Orgs<AS extends AbilitiesSchema> extends Map<string, Org<AS>> {
 	
 	updateDebounced = debounce(this.update, 250);
 	
-	preinit? = async () => {
-		
-		const {
-			schema: customSchema,
-			indexes: customIndexes,
-			null: nullProps
-		} = this.preinitOptions!;
-		
-		if (customSchema) {
-			if (customSchema.required)
-				removeAll(customSchema.required as string [], basisSchema.required as string[]);
-			if (customSchema.properties)
-				deleteProps(customSchema, Object.keys(basisSchema.properties!));
-		}
-		
-		const jsonSchema = {
-			...basisSchema,
-			...customSchema,
-			required: [ ...basisSchema.required as string[], ...customSchema?.required as string[] ?? [] ],
-			properties: { ...basisSchema.properties, ...customSchema?.properties }
-		};
-		
-		this.collection = Object.assign(
-			await this.collections.ensure<OrgDoc>("orgs", { jsonSchema }),
-			{
-				deleteOne: preventDirectDelete,
-				deleteMany: preventDirectDelete
-			}
-		);
-		
-		this.collection.ensureIndexes([ ...indexes, ...customIndexes ?? [] ]);
-		
-		this.null = Object.assign(
-			new Org<AS>(this, {
-				...nullProps,
-				_id: "",
-				title: "",
-				note: "",
-				owners: [],
-				createdAt: Date.now()
-			}),
-			{
-				_id: null,
-				ownerIds: new EmptyArray(),
-				ownerOrgs: new EmptySet(),
-				ownerUsers: new EmptySet(),
-				slaveOrgs: new EmptySet()
-			}
-		);
-		
-		for (const orgDoc of await this.collection.find().toArray())
-			this.load(orgDoc);
-		
-		delete this.preinitOptions;
-		delete this.preinit;
-		
-	};
-	
-	init? = async () => {
-		
-		await this.update();
-		
-		this.collection.changeListeners.add(next => {
-			switch (next.operationType) {
-				case "insert": {
-					const org = new Org<AS>(this, next.fullDocument);
-					this.users.emit("orgs-org-update", org, next);
-					break;
-				}
-				
-				case "replace":
-					this.get(next.documentKey._id)?.update(next.fullDocument, next);
-					break;
-				
-				case "update":
-					this.get(next.documentKey._id)?.update(next.updateDescription.updatedFields!, next);
-					break;
-				
-				case "delete":
-					this.get(next.documentKey._id)?.delete();
-					this.users.emit("orgs-org-update", null, next);
-			}
-			
-		});
-		
-		delete this.init;
-		
-	};
-	
-	new({ title, note, ...restProps }: Omit<OrgDoc, "_id" | "createdAt" | "owners">, ownerId: string) {
+	create({ title, note, ...restProps }: Omit<OrgDoc, "_id" | "createdAt" | "owners">, ownerId?: string) {
 		return this.collection.insertOne({
 			_id: newObjectIdString(),
 			title: title ?? "",
@@ -239,7 +251,29 @@ export class Orgs<AS extends AbilitiesSchema> extends Map<string, Org<AS>> {
 		});
 	}
 	
-	collectionDelete(org: Org<AS> | string) {
+	async updateOrg(_id: string, updates: Omit<OrgDoc, "_id" | "createdAt">, byUser?: User<AS>) {
+		const org = this.get(_id)!;
+		
+		if (!org)
+			return false;
+		
+		if (updates.owners)
+			updates.owners =
+				this.users.sortIds(
+					union(
+						byUser ?
+							without(org.ownerIds, byUser.slaveIds) :
+							[],
+						without(updates.owners, [ _id, ..._ids(org.slaveOrgs) ])
+					)
+				);
+		
+		await this.collection.updateOne({ _id }, { $set: updates });
+		
+		return true;
+	}
+	
+	deleteOrg(org: Org<AS> | string) {
 		const _id = typeof org == "string" ? org : org._id;
 		
 		return this.collection.bulkWrite([
@@ -250,7 +284,7 @@ export class Orgs<AS extends AbilitiesSchema> extends Map<string, Org<AS>> {
 	
 	replaceMap = new Map<string, string>();
 	
-	replaceHandlers = new Set<(fromId: string, toId: null | string) => Promise<void> | void>();
+	replaceHandlers = new Set<(fromId: string, toId: string | null) => Promise<void> | void>();
 	
 	async replace(fromId: string) {
 		const toId = this.replaceMap.get(fromId) ?? null;

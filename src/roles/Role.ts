@@ -3,6 +3,7 @@ import type { ChangeStreamDocument } from "insite-db";
 import { Roles } from "./Roles";
 import { RoleDoc } from "./types";
 
+
 const snapshots = new Map();
 
 
@@ -32,7 +33,6 @@ export class Role<AS extends AbilitiesSchema> {
 	inheritedAbilities: Abilities<AS> = {};
 	
 	update({ _id, involves: ownInvolveIds, abilities: ownAbilities, title, ...restProps }: Partial<RoleDoc>, next?: ChangeStreamDocument<RoleDoc>) {
-		
 		Object.assign(this, restProps);
 		
 		if (ownInvolveIds)
@@ -46,7 +46,6 @@ export class Role<AS extends AbilitiesSchema> {
 			this.displayTitle = title || this._id;
 		}
 		
-		
 		if (ownInvolveIds || ownAbilities) {
 			const snapshot = [
 				this.ownInvolveIds.join(","),
@@ -57,9 +56,8 @@ export class Role<AS extends AbilitiesSchema> {
 				snapshots.set(this._id, snapshot);
 				
 				if (this.#roles.users.isInited)
-					this.#roles.updateDebounced();
-				
-				this.#roles.users.emit("roles-role-update", this, next);
+					this.#roles.updateDebounced()
+						.then(() => this.#roles.users.emit("roles-role-update", this, next));
 			}
 		}
 		

@@ -4,7 +4,9 @@ import {
 	_ids,
 	debounce,
 	deleteProps,
-	removeAll
+	removeAll,
+	StatefulPromise,
+	without
 } from "@nesvet/n";
 import type { AbilitiesSchema } from "insite-common";
 import {
@@ -51,10 +53,10 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 	constructor(collections: InSiteCollections, options: Options<AS>) {
 		super();
 		
-		const eventEmitter = new EventEmitter() as {
+		const eventEmitter = new EventEmitter() as EventEmitter & {
 			_events: Record<string, object>;
 			_eventsCount: number;
-		} & EventEmitter;
+		};
 		this._events = eventEmitter._events;
 		this._eventsCount = eventEmitter._eventsCount;
 		this.emit = eventEmitter.emit;
@@ -70,7 +72,7 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 		
 		this.initOptions = options;
 		
-		this.#initPromise = this.init!();
+		this.init();
 		
 	}
 	
@@ -94,13 +96,118 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 	orgs!: Orgs<AS>;
 	avatars!: Avatars<AS>;
 	
-	isInited = false;
-	
 	byEmail = new Map();
 	bySessionId = new Map();
 	sorted: User<AS>[] = [];
 	
 	isSortRequired = false;
+	
+	#isPreinited = false;
+	
+	async preinit() {
+		
+		if (!this.#isPreinited) {
+			this.#isPreinited = true;
+			
+			const {
+				indexes: customIndexes,
+				schema: customSchema,
+				initialRoot: initialRootProps
+				// avatars: avatarsOptions
+			} = this.initOptions!;
+			
+			if (customSchema) {
+				if (customSchema.required)
+					removeAll(customSchema.required as string[], basisSchema.required as string[]);
+				if (customSchema.properties)
+					deleteProps(customSchema, Object.keys(basisSchema.properties!));
+			}
+			
+			const jsonSchema = {
+				...basisSchema,
+				...customSchema,
+				required: [ ...basisSchema.required as string [], ...customSchema?.required as string[] ?? [] ],
+				properties: { ...basisSchema.properties, ...customSchema?.properties }
+			};
+			
+			this.collection = await this.collections.ensure<UserDoc>("users", { jsonSchema });
+			
+			this.collection.ensureIndexes([ ...indexes, ...customIndexes ?? [] ]);
+			
+			if (!await this.collection.countDocuments({ roles: "root" }))
+				await this.create({
+					email: process.env.INSITE_ROOT_EMAIL ?? "insite@root.email",
+					password: process.env.INSITE_ROOT_PASSWORD ?? "inSiteRootPassword",
+					name: { first: "Root" },
+					job: "Root",
+					...initialRootProps,
+					roles: [ "root" ],
+					org: null
+				});
+			
+			
+			for (const userDoc of await this.collection.find().toArray())
+				this.load(userDoc);
+		}
+		
+	}
+	
+	isInited = false;
+	
+	protected async init() {
+		
+		if (!this.isInited) {
+			this.isInited = true;
+			
+			const {
+				roles: rolesOptions,
+				orgs: orgsOptions,
+				sessions: sessionsOptions
+				// avatars: avatarsOptions
+			} = this.initOptions!;
+			
+			this.roles = new Roles<AS>(this, rolesOptions);
+			this.orgs = new Orgs<AS>(this, orgsOptions);
+			this.sessions = new Sessions<AS>(this, sessionsOptions);
+			this.avatars = new Avatars<AS>(this/* , avatarsOptions */);
+			
+			await this.roles.init();
+			await this.orgs.preinit();
+			await this.preinit();
+			await this.orgs.init();
+			await this.avatars.init();
+			
+			this.update(true);
+			
+			this.collection.changeListeners.add(next => {
+				switch (next.operationType) {
+					case "insert":
+						new User<AS>(this, next.fullDocument);
+						break;
+					
+					case "replace":
+						this.get(next.documentKey._id)?.update(next.fullDocument);
+						break;
+					
+					case "update":
+						this.get(next.documentKey._id)?.update(next.updateDescription.updatedFields!);
+						break;
+					
+					case "delete":
+						this.get(next.documentKey._id)?.delete();
+				}
+				
+			});
+			
+			await this.sessions.init();
+			
+			delete this.initOptions;
+			
+			this.#initPromise.resolve(this);
+		}
+		
+	}
+	
 	
 	load(userDoc: UserDoc) {
 		new User<AS>(this, userDoc);
@@ -132,111 +239,13 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 	
 	updateDebounced = debounce(() => this.update(), 250);
 	
-	private preinit? = async () => {
-		
-		const {
-			indexes: customIndexes,
-			schema: customSchema,
-			initialRoot: initialRootProps
-			// avatars: avatarsOptions
-		} = this.initOptions!;
-		
-		if (customSchema) {
-			if (customSchema.required)
-				removeAll(customSchema.required as string[], basisSchema.required as string[]);
-			if (customSchema.properties)
-				deleteProps(customSchema, Object.keys(basisSchema.properties!));
-		}
-		
-		const jsonSchema = {
-			...basisSchema,
-			...customSchema,
-			required: [ ...basisSchema.required as string [], ...customSchema?.required as string[] ?? [] ],
-			properties: { ...basisSchema.properties, ...customSchema?.properties }
-		};
-		
-		this.collection = await this.collections.ensure<UserDoc>("users", { jsonSchema });
-		
-		this.collection.ensureIndexes([ ...indexes, ...customIndexes ?? [] ]);
-		
-		if (!await this.collection.countDocuments({ roles: "root" }))
-			await this.new({
-				email: process.env.INSITE_ROOT_EMAIL ?? "insite@root.email",
-				password: process.env.INSITE_ROOT_PASSWORD ?? "inSiteRootPassword",
-				roles: [ "root" ],
-				name: { first: "Root" },
-				org: null,
-				job: "Root",
-				...initialRootProps && deleteProps(initialRootProps, [ "roles", "org" ])
-			});
-		
-		
-		for (const userDoc of await this.collection.find().toArray())
-			this.load(userDoc);
-		
-		delete this.preinit;
-		
-	};
-	
-	#initPromise;
-	
-	private init? = async () => {
-		
-		const {
-			roles: rolesOptions,
-			orgs: orgsOptions,
-			sessions: sessionsOptions
-		// avatars: avatarsOptions
-		} = this.initOptions!;
-		
-		this.roles = new Roles<AS>(this, rolesOptions);
-		this.orgs = new Orgs<AS>(this, orgsOptions);
-		this.sessions = new Sessions<AS>(this, sessionsOptions);
-		this.avatars = new Avatars<AS>(this/* , avatarsOptions */);
-		
-		await this.roles.init!();
-		await this.orgs.preinit!();
-		await this.preinit!();
-		await this.orgs.init!();
-		await this.avatars.init!();
-		
-		this.isInited = true;
-		
-		this.update(true);
-		
-		this.collection.changeListeners.add(next => {
-			switch (next.operationType) {
-				case "insert":
-					new User<AS>(this, next.fullDocument);
-					break;
-				
-				case "replace":
-					this.get(next.documentKey._id)?.update(next.fullDocument);
-					break;
-				
-				case "update":
-					this.get(next.documentKey._id)?.update(next.updateDescription.updatedFields!);
-					break;
-				
-				case "delete":
-					this.get(next.documentKey._id)?.delete();
-			}
-			
-		});
-		
-		await this.sessions.init!();
-		
-		delete this.initOptions;
-		delete this.init;
-		
-		return this;
-	};
+	#initPromise = new StatefulPromise<this>();
 	
 	whenReady() {
 		return this.#initPromise;
 	}
 	
-	async new({ email, password, roles, name, org, job, ...restProps }: Omit<UserDoc, "_id" | "createdAt">) {
+	async create({ email, password, roles, name, org, job, ...restProps }: Omit<UserDoc, "_id" | "createdAt">) {
 		if (this.byEmail.has(email))
 			throw new Error("User exists");
 		
@@ -255,6 +264,27 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 			...deleteProps(restProps, [ "_id" ]),
 			createdAt: Date.now()
 		});
+		
+		return true;
+	}
+	
+	async updateUser(_id: string, updates: Omit<UserDoc, "_id" | "createdAt">, byUser?: User<AS>) {
+		const user = this.get(_id)!;
+		
+		if (!user)
+			return false;
+		
+		if (updates.roles)
+			updates.roles =
+				user.isRoot ?
+					[ "root" ] :
+					this.roles.cleanUpIds(
+						byUser ?
+							without(user.ownRoleIds, byUser.slaveRoleIds).concat(updates.roles) :
+							updates.roles
+					);
+		
+		await this.collection.updateOne({ _id }, { $set: updates });
 		
 		return true;
 	}
@@ -285,7 +315,7 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 		if (!user.abilities.login)
 			throw new Error("userisnotabletologin");
 		
-		return this.sessions.new(user, sessionProps);
+		return this.sessions.create(user, sessionProps);
 	}
 	
 	logout(session: Session<AS>) {
@@ -324,7 +354,7 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 	
 	replaceMap = new Map<string, string>();
 	
-	replaceHandlers = new Set<(fromId: string, toId: null | string) => Promise<void> | void>();
+	replaceHandlers = new Set<(fromId: string, toId: string | null) => Promise<void> | void>();
 	
 	async replace(fromId: string) {
 		const toId = this.replaceMap.get(fromId) ?? null;
@@ -334,6 +364,12 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 		for (const handler of this.replaceHandlers)
 			await handler(fromId, toId);
 		
+	}
+	
+	async deleteUser(_id: string) {
+		const { deletedCount } = await this.collection.deleteOne({ _id });
+		
+		return Boolean(deletedCount);
 	}
 	
 	
