@@ -34,14 +34,14 @@
     "argon2": "^0.40.3",
     "eventemitter3": "^5.0.1",
     "insite-common": "^2.1.0",
-    "insite-db": "^2.0.4",
-    "insite-subscriptions-server": "^2.0.21",
-    "insite-ws": "^2.0.20",
-    "insite-ws-transfers": "^2.0.17"
+    "insite-db": "^2.1.0",
+    "insite-subscriptions-server": "^2.1.0",
+    "insite-ws": "^2.1.0",
+    "insite-ws-transfers": "^2.1.0"
   },
   "devDependencies": {
     "@nesvet/conveyer": "^2.4.2",
-    "@nesvet/eslint-config": "^2.0.46",
+    "@nesvet/eslint-config": "^2.0.47",
     "@types/node": "^22.13.1",
     "typescript": "^5.7.3"
   }
