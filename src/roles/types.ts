@@ -1,4 +1,4 @@
-import { InSiteCollectionIndexes, InSiteCollectionSchema } from "insite-db";
+import { CollectionIndexes, CollectionSchema } from "insite-db";
 import { GenericAbilities } from "../abilities";
 
 
@@ -12,7 +12,7 @@ export type RoleDoc = {
 };
 
 export type RolesOptions = {
-	schema?: InSiteCollectionSchema;
-	indexes?: InSiteCollectionIndexes;
+	schema?: CollectionSchema;
+	indexes?: CollectionIndexes;
 	root?: Partial<RoleDoc>;
 };

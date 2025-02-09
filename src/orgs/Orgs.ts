@@ -10,14 +10,14 @@ import {
 	without
 } from "@nesvet/n";
 import type { AbilitiesSchema } from "insite-common";
-import { InSiteCollectionIndexes, InSiteWatchedCollection, newObjectIdString } from "insite-db";
+import { CollectionIndexes, WatchedCollection, newObjectIdString } from "insite-db";
 import type { User, Users } from "../users";
 import { Org } from "./Org";
 import { basisSchema } from "./schema";
 import type { OrgDoc, OrgsOptions } from "./types";
 
 
-const indexes: InSiteCollectionIndexes = [
+const indexes: CollectionIndexes = [
 	[ { owners: 1 } ]
 ];
 
@@ -41,7 +41,7 @@ export class Orgs<AS extends AbilitiesSchema> extends Map<string, Org<AS>> {
 	collections;
 	private preinitOptions?;
 	
-	collection!: InSiteWatchedCollection<OrgDoc> & {
+	collection!: WatchedCollection<OrgDoc> & {
 		/** @deprecated Direct usage of roles collection.deleteOne is forbidden. Use orgs.deleteOrg instead. */
 		deleteOne: typeof preventDirectDelete;
 		

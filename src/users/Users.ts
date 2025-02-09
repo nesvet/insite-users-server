@@ -10,10 +10,10 @@ import {
 } from "@nesvet/n";
 import type { AbilitiesSchema } from "insite-common";
 import {
-	InSiteCollectionIndexes,
-	InSiteCollections,
-	InSiteCollectionSchema,
-	InSiteWatchedCollection,
+	CollectionIndexes,
+	Collections,
+	CollectionSchema,
+	WatchedCollection,
 	newObjectIdString
 } from "insite-db";
 import { AbilitiesMap } from "../abilities";
@@ -31,7 +31,7 @@ import { User } from "./User";
 import type { UserDoc } from "./types";
 
 
-const indexes: InSiteCollectionIndexes = [
+const indexes: CollectionIndexes = [
 	[ { email: 1 }, { unique: true } ],
 	[ { org: 1 } ]
 ];
@@ -39,8 +39,8 @@ const indexes: InSiteCollectionIndexes = [
 
 export type Options<AS> = {
 	abilities: AS;
-	indexes?: InSiteCollectionIndexes;
-	schema?: InSiteCollectionSchema;
+	indexes?: CollectionIndexes;
+	schema?: CollectionSchema;
 	initialRoot?: Partial<UserDoc>;
 	roles?: RolesOptions;
 	orgs?: OrgsOptions;
@@ -50,7 +50,7 @@ export type Options<AS> = {
 
 
 export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
-	constructor(collections: InSiteCollections, options: Options<AS>) {
+	constructor(collections: Collections, options: Options<AS>) {
 		super();
 		
 		const eventEmitter = new EventEmitter() as EventEmitter & {
@@ -90,7 +90,7 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 	collections;
 	abilities;
 	
-	collection!: InSiteWatchedCollection<UserDoc>;
+	collection!: WatchedCollection<UserDoc>;
 	roles!: Roles<AS>;
 	sessions!: Sessions<AS>;
 	orgs!: Orgs<AS>;
@@ -373,7 +373,7 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 	}
 	
 	
-	static init<IAS extends AbilitiesSchema>(collections: InSiteCollections, options: Options<IAS>) {
+	static init<IAS extends AbilitiesSchema>(collections: Collections, options: Options<IAS>) {
 		const users = new Users(collections, options);
 		
 		return users.whenReady();

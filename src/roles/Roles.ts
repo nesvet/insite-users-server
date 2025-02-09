@@ -7,7 +7,7 @@ import {
 	removeAll
 } from "@nesvet/n";
 import type { AbilitiesSchema } from "insite-common";
-import type { InSiteCollectionIndexes, InSiteWatchedCollection } from "insite-db";
+import type { CollectionIndexes, WatchedCollection } from "insite-db";
 import type { AbilityParam, GenericAbilities } from "../abilities/types";
 import type { Users } from "../users";
 import { Role } from "./Role";
@@ -15,7 +15,7 @@ import { basisSchema } from "./schema";
 import type { RoleDoc, RolesOptions } from "./types";
 
 
-const indexes: InSiteCollectionIndexes = [
+const indexes: CollectionIndexes = [
 	[ { involves: 1 } ]
 ];
 
@@ -53,7 +53,7 @@ export class Roles<AS extends AbilitiesSchema> extends Map<string, Role<AS>> {
 	
 	users;
 	collections;
-	collection!: InSiteWatchedCollection<RoleDoc> & {
+	collection!: WatchedCollection<RoleDoc> & {
 		/** @deprecated Direct usage of roles collection.deleteOne is forbidden. Use roles.deleteRole instead. */
 		deleteOne: typeof preventDirectDelete;
 		

@@ -1,5 +1,5 @@
 import type { AbilitiesSchema } from "insite-common";
-import { Binary, type InSiteWatchedCollection } from "insite-db";
+import { Binary, type WatchedCollection } from "insite-db";
 import type { Users } from "../Users";
 import { schema as jsonSchema } from "./schema";
 import type { AvatarDoc } from "./types";
@@ -19,7 +19,7 @@ export class Avatars<AS extends AbilitiesSchema> {
 	users;
 	collections;
 	
-	collection!: InSiteWatchedCollection<AvatarDoc>;
+	collection!: WatchedCollection<AvatarDoc>;
 	
 	#isInited = false;
 	

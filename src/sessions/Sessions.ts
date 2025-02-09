@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { deleteProps, random, removeAll } from "@nesvet/n";
 import type { AbilitiesSchema } from "insite-common";
-import { InSiteCollectionIndexes, InSiteWatchedCollection } from "insite-db";
+import { CollectionIndexes, WatchedCollection } from "insite-db";
 import { User } from "../users/User";
 import type { Users } from "../users";
 import { basisSchema } from "./schema";
@@ -11,7 +11,7 @@ import { SessionDoc, SessionsOptions } from "./types";
 
 const expireAfterSeconds = 3600 * 24 * 7;
 
-const indexes: InSiteCollectionIndexes = [
+const indexes: CollectionIndexes = [
 	[ { user: 1 } ],
 	[ { expiresAt: 1 }, { expireAfterSeconds } ]
 ];
@@ -32,7 +32,7 @@ export class Sessions<AS extends AbilitiesSchema> extends Map<string, Session<AS
 	
 	private initOptions?;
 	
-	collection!: InSiteWatchedCollection<SessionDoc> & {
+	collection!: WatchedCollection<SessionDoc> & {
 		expireAfterSeconds: number;
 	};
 	

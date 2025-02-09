@@ -1,4 +1,4 @@
-import { InSiteCollectionIndexes, InSiteCollectionSchema } from "insite-db";
+import { CollectionIndexes, CollectionSchema } from "insite-db";
 
 
 export type SessionDoc = {
@@ -14,6 +14,6 @@ export type SessionDoc = {
 };
 
 export type SessionsOptions = {
-	schema?: InSiteCollectionSchema;
-	indexes?: InSiteCollectionIndexes;
+	schema?: CollectionSchema;
+	indexes?: CollectionIndexes;
 };
