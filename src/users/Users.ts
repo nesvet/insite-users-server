@@ -13,8 +13,8 @@ import {
 	CollectionIndexes,
 	Collections,
 	CollectionSchema,
-	WatchedCollection,
-	newObjectIdString
+	newObjectIdString,
+	WatchedCollection
 } from "insite-db";
 import { AbilitiesMap } from "../abilities";
 import { Orgs } from "../orgs";
