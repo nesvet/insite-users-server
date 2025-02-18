@@ -142,13 +142,21 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 					job: "Root",
 					...initialRootProps,
 					roles: [ "root" ],
-					org: null
+					org: null,
+					meta: {}
 				});
 			
+			await this.#maintain();
 			
 			for (const userDoc of await this.collection.find().toArray())
 				this.load(userDoc);
 		}
+		
+	}
+	
+	async #maintain() {
+		
+		await this.collection.updateMany({ meta: { $exists: false } }, { $set: { meta: {} } });
 		
 	}
 	
@@ -261,6 +269,7 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 			},
 			org: org ?? null,
 			job: job ?? "",
+			meta: {},
 			...deleteProps(restProps, [ "_id" ]),
 			createdAt: Date.now()
 		});

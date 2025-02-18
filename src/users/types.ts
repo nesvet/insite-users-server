@@ -11,5 +11,6 @@ export type UserDoc = {
 	org: string | null;
 	job: string;
 	avatar?: string | null;
+	meta: Record<string, unknown>;
 	createdAt: number;
 };

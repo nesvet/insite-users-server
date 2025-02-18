@@ -11,6 +11,7 @@ export const basisSchema: CollectionSchema = {
 		"name",
 		"org",
 		"job",
+		"meta",
 		"createdAt"
 	],
 	properties: {
@@ -83,6 +84,9 @@ export const basisSchema: CollectionSchema = {
 					bsonType: "null"
 				}
 			]
+		},
+		meta: {
+			bsonType: "object"
 		},
 		createdAt: {
 			bsonType: "number"

@@ -44,6 +44,7 @@ export class Roles<AS extends AbilitiesSchema> extends Map<string, Role<AS>> {
 			abilities: this.abilities.getDefaultAbilities(),
 			title: "Root",
 			description: "Root",
+			meta: {},
 			createdAt: Date.now()
 		});
 		
@@ -101,6 +102,8 @@ export class Roles<AS extends AbilitiesSchema> extends Map<string, Role<AS>> {
 			
 			this.collection.ensureIndexes([ ...indexes, ...customIndexes ?? [] ]);
 			
+			await this.#maintain();
+			
 			for (const roleDoc of await this.collection.find().toArray()) {
 				if (this.abilities.adjust(roleDoc.abilities))
 					await this.collection.updateOne({ _id: roleDoc._id }, { $set: { abilities: roleDoc.abilities } });
@@ -135,6 +138,12 @@ export class Roles<AS extends AbilitiesSchema> extends Map<string, Role<AS>> {
 			
 			delete this.initOptions;
 		}
+		
+	}
+	
+	async #maintain() {
+		
+		await this.collection.updateMany({ meta: { $exists: false } }, { $set: { meta: {} } });
 		
 	}
 	
@@ -239,6 +248,7 @@ export class Roles<AS extends AbilitiesSchema> extends Map<string, Role<AS>> {
 			abilities: {},
 			title: title ?? "",
 			description: description ?? "",
+			meta: {},
 			...deleteProps(restProps, [ "abilities" ]),
 			createdAt: Date.now()
 		});

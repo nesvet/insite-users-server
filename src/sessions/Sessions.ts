@@ -71,7 +71,7 @@ export class Sessions<AS extends AbilitiesSchema> extends Map<string, Session<AS
 			
 			this.collection.ensureIndexes([ ...indexes, ...customIndexes ?? [] ]);
 			
-			await this.collection.updateMany({ isOnline: true }, { $set: { isOnline: false } });
+			await this.#maintain();
 			
 			for (const sessionDoc of await this.collection.find().toArray())
 				this.load(sessionDoc);
@@ -105,6 +105,15 @@ export class Sessions<AS extends AbilitiesSchema> extends Map<string, Session<AS
 		
 	}
 	
+	async #maintain() {
+		
+		await this.collection.bulkWrite([
+			{ updateMany: { filter: { meta: { $exists: false } }, update: { $set: { meta: {} } } } },
+			{ updateMany: { filter: { isOnline: true }, update: { $set: { isOnline: false } } } }
+		]);
+		
+	}
+	
 	uid() {
 		
 		let _id;
@@ -131,6 +140,7 @@ export class Sessions<AS extends AbilitiesSchema> extends Map<string, Session<AS
 			...props,
 			_id: this.uid(),
 			user: user._id,
+			meta: {},
 			createdAt: ts,
 			prolongedAt: ts,
 			expiresAt: new Date(ts + (expireAfterSeconds * 1000))

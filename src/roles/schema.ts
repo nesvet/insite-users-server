@@ -9,6 +9,7 @@ export const basisSchema: CollectionSchema = {
 		"abilities",
 		"title",
 		"description",
+		"meta",
 		"createdAt"
 	],
 	properties: {
@@ -37,6 +38,9 @@ export const basisSchema: CollectionSchema = {
 		description: {
 			bsonType: "string",
 			maxLength: 10240
+		},
+		meta: {
+			bsonType: "object"
 		},
 		createdAt: {
 			bsonType: "number"

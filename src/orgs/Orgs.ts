@@ -95,6 +95,7 @@ export class Orgs<AS extends AbilitiesSchema> extends Map<string, Org<AS>> {
 					title: "",
 					note: "",
 					owners: [],
+					meta: {},
 					createdAt: Date.now()
 				}),
 				{
@@ -106,11 +107,19 @@ export class Orgs<AS extends AbilitiesSchema> extends Map<string, Org<AS>> {
 				}
 			);
 			
+			await this.#maintain();
+			
 			for (const orgDoc of await this.collection.find().toArray())
 				this.load(orgDoc);
 			
 			delete this.preinitOptions;
 		}
+		
+	}
+	
+	async #maintain() {
+		
+		await this.collection.updateMany({ meta: { $exists: false } }, { $set: { meta: {} } });
 		
 	}
 	
@@ -246,6 +255,7 @@ export class Orgs<AS extends AbilitiesSchema> extends Map<string, Org<AS>> {
 			title: title ?? "",
 			note: note ?? "",
 			owners: ownerId ? [ ownerId ] : [],
+			meta: {},
 			...deleteProps(restProps, [ "_id", "owners" ]),
 			createdAt: Date.now()
 		});

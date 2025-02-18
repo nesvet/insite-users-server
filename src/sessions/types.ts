@@ -7,9 +7,12 @@ export type SessionDoc = {
 	userAgent: string;
 	remoteAddress: string;
 	isOnline: boolean;
+	meta: Record<string, unknown>;
 	createdAt: number;
 	prolongedAt: number;
 	expiresAt: Date;
+	
+	// TODO: Remove in favor of meta
 	[customProp: string]: unknown;
 };
 

@@ -29,7 +29,15 @@ export class Avatars<AS extends AbilitiesSchema> {
 			this.#isInited = true;
 			
 			this.collection = await this.collections.ensure<AvatarDoc>("users.avatars", { jsonSchema });
+			
+			await this.#maintain();
 		}
+		
+	}
+	
+	async #maintain() {
+		
+		await this.collection.updateMany({ meta: { $exists: false } }, { $set: { meta: {} } });
 		
 	}
 	
@@ -43,7 +51,8 @@ export class Avatars<AS extends AbilitiesSchema> {
 				type,
 				size: binaryData.length(),
 				ts,
-				data: binaryData
+				data: binaryData,
+				meta: {}
 			}, { upsert: true }),
 			this.users.collection.updateOne({ _id }, { $set: { avatar: ts } })
 		]);

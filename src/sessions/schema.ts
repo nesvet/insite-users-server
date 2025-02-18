@@ -8,6 +8,7 @@ export const basisSchema: CollectionSchema = {
 		"user",
 		"remoteAddress",
 		"isOnline",
+		"meta",
 		"createdAt",
 		"prolongedAt",
 		"expiresAt"
@@ -32,6 +33,9 @@ export const basisSchema: CollectionSchema = {
 		isOnline: {
 			bsonType: "bool"
 		},
+		meta: {
+			bsonType: "object"
+		},
 		createdAt: {
 			bsonType: "number"
 		},
@@ -42,4 +46,5 @@ export const basisSchema: CollectionSchema = {
 			bsonType: "date"
 		}
 	}
+	// TODO: Restrict additional properties (not needed with meta)
 };

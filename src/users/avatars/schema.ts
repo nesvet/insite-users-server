@@ -8,7 +8,8 @@ export const schema: CollectionSchema = {
 		"type",
 		"size",
 		"ts",
-		"data"
+		"data",
+		"meta"
 	],
 	properties: {
 		_id: {
@@ -28,6 +29,9 @@ export const schema: CollectionSchema = {
 		},
 		data: {
 			bsonType: "binData"
+		},
+		meta: {
+			bsonType: "object"
 		}
 	},
 	additionalProperties: false

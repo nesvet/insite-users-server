@@ -8,6 +8,7 @@ export const basisSchema: CollectionSchema = {
 		"title",
 		"note",
 		"owners",
+		"meta",
 		"createdAt"
 	],
 	properties: {
@@ -31,6 +32,9 @@ export const basisSchema: CollectionSchema = {
 				pattern: regexps._id.source
 			},
 			additionalItems: false
+		},
+		meta: {
+			bsonType: "object"
 		},
 		createdAt: {
 			bsonType: "number"

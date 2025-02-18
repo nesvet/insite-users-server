@@ -6,6 +6,7 @@ export type OrgDoc = {
 	title: string;
 	note: string;
 	owners: string[];
+	meta: Record<string, unknown>;
 	createdAt: number;
 };
 

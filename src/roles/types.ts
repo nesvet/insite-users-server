@@ -8,6 +8,7 @@ export type RoleDoc = {
 	abilities: GenericAbilities;
 	title: string;
 	description: string;
+	meta: Record<string, unknown>;
 	createdAt: number;
 };
 

@@ -7,6 +7,7 @@ export type AvatarDoc = {
 	size: number;
 	ts: string;
 	data: Binary;
+	meta: Record<string, unknown>;
 };
 
 export type AvatarsOptions = {
