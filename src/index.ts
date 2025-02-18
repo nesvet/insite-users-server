@@ -4,5 +4,5 @@ export type { Org, OrgDoc, Orgs } from "./orgs";
 export type { Role, RoleDoc, Roles } from "./roles";
 export { RolesError } from "./roles";
 export type { Session, SessionDoc, Sessions } from "./sessions";
-export { SubordinationError, Users } from "./users";
+export { PermissionError, SubordinationError, UnauthorizedError, Users } from "./users";
 export type { AvatarDoc, Options, User, UserDoc } from "./users";
