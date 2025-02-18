@@ -10,7 +10,7 @@ import {
 	without
 } from "@nesvet/n";
 import type { AbilitiesSchema } from "insite-common";
-import { CollectionIndexes, WatchedCollection, newObjectIdString } from "insite-db";
+import { CollectionIndexes, newObjectIdString, WatchedCollection } from "insite-db";
 import type { User, Users } from "../users";
 import { Org } from "./Org";
 import { basisSchema } from "./schema";

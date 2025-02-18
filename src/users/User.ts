@@ -46,8 +46,8 @@ export class User<AS extends AbilitiesSchema> {
 	displayLabel = "";
 	org!: Org<AS>;
 	job: string = "";
-	avatar: null | string = null;
-	avatarUrl: null | string = null;
+	avatar: string | null = null;
+	avatarUrl: string | null = null;
 	
 	#users;
 	

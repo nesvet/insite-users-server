@@ -8,8 +8,8 @@ export type UserDoc = {
 		middle?: string;
 		last?: string;
 	};
-	org: null | string;
+	org: string | null;
 	job: string;
-	avatar?: null | string;
+	avatar?: string | null;
 	createdAt: number;
 };
