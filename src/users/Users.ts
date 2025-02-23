@@ -22,31 +22,17 @@ import { Org } from "../orgs/Org";
 import { Roles } from "../roles";
 import { Sessions } from "../sessions";
 import { Session } from "../sessions/Session";
-import type { OrgsOptions } from "../orgs/types";
-import type { RolesOptions } from "../roles/types";
-import type { SessionDoc, SessionsOptions } from "../sessions/types";
-import { Avatars/* , AvatarsOptions */ } from "./avatars";
+import type { SessionDoc } from "../sessions/types";
+import { Avatars } from "./avatars";
 import { basisSchema } from "./schema";
 import { User } from "./User";
-import type { UserDoc } from "./types";
+import type { Options, UserDoc } from "./types";
 
 
 const indexes: CollectionIndexes = [
 	[ { email: 1 }, { unique: true } ],
 	[ { org: 1 } ]
 ];
-
-
-export type Options<AS> = {
-	abilities: AS;
-	indexes?: CollectionIndexes;
-	schema?: CollectionSchema;
-	initialRoot?: Partial<UserDoc>;
-	roles?: RolesOptions;
-	orgs?: OrgsOptions;
-	sessions?: SessionsOptions;
-	// avatars?: AvatarsOptions;
-};
 
 
 export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
