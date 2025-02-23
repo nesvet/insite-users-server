@@ -1,6 +1,7 @@
 import type { AbilitiesSchema } from "insite-common";
 import { Binary, type WatchedCollection } from "insite-db";
 import type { Users } from "../Users";
+import { schema } from "./schema";
 import type { AvatarDoc, AvatarsOptions } from "./types";
 
 

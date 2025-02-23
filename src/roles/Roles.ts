@@ -86,7 +86,7 @@ export class Roles<AS extends AbilitiesSchema> extends Map<string, Role<AS>> {
 					deleteProps(customSchema, Object.keys(basisSchema.properties!));
 			}
 			
-			const jsonSchema = {
+			const schema = {
 				...basisSchema,
 				...customSchema,
 				required: [ ...basisSchema.required as string[], ...customSchema?.required as string[] ?? [] ],
