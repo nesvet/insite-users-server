@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { deleteProps, random, removeAll } from "@nesvet/n";
 import type { AbilitiesSchema } from "insite-common";
-import { CollectionIndexes, WatchedCollection } from "insite-db";
+import { ChangeStreamDocument, CollectionIndexes, WatchedCollection } from "insite-db";
 import { User } from "../users/User";
 import type { Users } from "../users";
 import { basisSchema } from "./schema";
@@ -77,29 +77,7 @@ export class Sessions<AS extends AbilitiesSchema> extends Map<string, Session<AS
 			for (const sessionDoc of await this.collection.find().toArray())
 				this.load(sessionDoc);
 			
-			this.collection.changeListeners.add(next => {
-				switch (next.operationType) {
-					case "insert":
-						if (!this.has(next.documentKey._id))
-							new Session<AS>(this, next.fullDocument);
-						
-						this.users.get(next.fullDocument.user)?.trimSessions();
-						
-						break;
-					
-					case "replace":
-						this.get(next.documentKey._id)?.update(next.fullDocument);
-						break;
-					
-					case "update":
-						this.get(next.documentKey._id)?.update(next.updateDescription.updatedFields!);
-						break;
-					
-					case "delete":
-						this.get(next.documentKey._id)?.delete();
-				}
-				
-			});
+			this.collection.onChange(this.#handleCollectionChange);
 			
 			delete this.initOptions;
 		}
@@ -114,6 +92,30 @@ export class Sessions<AS extends AbilitiesSchema> extends Map<string, Session<AS
 		]);
 		
 	}
+	
+	#handleCollectionChange = (next: ChangeStreamDocument<SessionDoc>) => {
+		switch (next.operationType) {
+			case "insert":
+				if (!this.has(next.documentKey._id))
+					new Session<AS>(this, next.fullDocument);
+				
+				this.users.get(next.fullDocument.user)?.trimSessions();
+				
+				break;
+			
+			case "replace":
+				this.get(next.documentKey._id)?.update(next.fullDocument);
+				break;
+			
+			case "update":
+				this.get(next.documentKey._id)?.update(next.updateDescription.updatedFields!);
+				break;
+			
+			case "delete":
+				this.get(next.documentKey._id)?.delete();
+		}
+		
+	};
 	
 	uid() {
 		

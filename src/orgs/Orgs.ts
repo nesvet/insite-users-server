@@ -10,7 +10,12 @@ import {
 	without
 } from "@nesvet/n";
 import type { AbilitiesSchema } from "insite-common";
-import { CollectionIndexes, newObjectIdString, WatchedCollection } from "insite-db";
+import {
+	ChangeStreamDocument,
+	CollectionIndexes,
+	newObjectIdString,
+	WatchedCollection
+} from "insite-db";
 import type { User, Users } from "../users";
 import { Org } from "./Org";
 import { basisSchema } from "./schema";
@@ -133,31 +138,33 @@ export class Orgs<AS extends AbilitiesSchema> extends Map<string, Org<AS>> {
 			
 			this.update();
 			
-			this.collection.changeListeners.add(next => {
-				switch (next.operationType) {
-					case "insert": {
-						const org = new Org<AS>(this, next.fullDocument);
-						this.users.emit("orgs-org-update", org, next);
-						break;
-					}
-					
-					case "replace":
-						this.get(next.documentKey._id)?.update(next.fullDocument, next);
-						break;
-					
-					case "update":
-						this.get(next.documentKey._id)?.update(next.updateDescription.updatedFields!, next);
-						break;
-					
-					case "delete":
-						this.get(next.documentKey._id)?.delete();
-						this.users.emit("orgs-org-update", null, next);
-				}
-				
-			});
+			this.collection.onChange(this.#handleCollectionChange);
 		}
 		
 	}
+	
+	#handleCollectionChange = (next: ChangeStreamDocument<OrgDoc>) => {
+		switch (next.operationType) {
+			case "insert": {
+				const org = new Org<AS>(this, next.fullDocument);
+				this.users.emit("orgs-org-update", org, next);
+				break;
+			}
+			
+			case "replace":
+				this.get(next.documentKey._id)?.update(next.fullDocument, next);
+				break;
+			
+			case "update":
+				this.get(next.documentKey._id)?.update(next.updateDescription.updatedFields!, next);
+				break;
+			
+			case "delete":
+				this.get(next.documentKey._id)?.delete();
+				this.users.emit("orgs-org-update", null, next);
+		}
+		
+	};
 	
 	load(orgDoc: OrgDoc) {
 		new Org<AS>(this, orgDoc);

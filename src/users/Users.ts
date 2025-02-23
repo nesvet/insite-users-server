@@ -10,9 +10,9 @@ import {
 } from "@nesvet/n";
 import type { AbilitiesSchema } from "insite-common";
 import {
+	ChangeStreamDocument,
 	CollectionIndexes,
 	Collections,
-	CollectionSchema,
 	newObjectIdString,
 	WatchedCollection
 } from "insite-db";
@@ -188,25 +188,7 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 			
 			this.update(true);
 			
-			this.collection.changeListeners.add(next => {
-				switch (next.operationType) {
-					case "insert":
-						new User<AS>(this, next.fullDocument);
-						break;
-					
-					case "replace":
-						this.get(next.documentKey._id)?.update(next.fullDocument);
-						break;
-					
-					case "update":
-						this.get(next.documentKey._id)?.update(next.updateDescription.updatedFields!);
-						break;
-					
-					case "delete":
-						this.get(next.documentKey._id)?.delete();
-				}
-				
-			});
+			this.collection.onChange(this.#handleCollectionChange);
 			
 			await this.sessions.init();
 			
@@ -216,6 +198,26 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 		}
 		
 	}
+	
+	#handleCollectionChange = (next: ChangeStreamDocument<UserDoc>) => {
+		switch (next.operationType) {
+			case "insert":
+				new User<AS>(this, next.fullDocument);
+				break;
+			
+			case "replace":
+				this.get(next.documentKey._id)?.update(next.fullDocument);
+				break;
+			
+			case "update":
+				this.get(next.documentKey._id)?.update(next.updateDescription.updatedFields!);
+				break;
+			
+			case "delete":
+				this.get(next.documentKey._id)?.delete();
+		}
+		
+	};
 	
 	
 	load(userDoc: UserDoc) {
