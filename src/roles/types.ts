@@ -1,4 +1,4 @@
-import { CollectionIndexes, CollectionSchema } from "insite-db";
+import { CollectionIndexes, CollectionOptions, CollectionSchema } from "insite-db";
 import { GenericAbilities } from "../abilities";
 
 
@@ -16,4 +16,5 @@ export type RolesOptions = {
 	schema?: CollectionSchema;
 	indexes?: CollectionIndexes;
 	root?: Partial<RoleDoc>;
+	collection?: Omit<CollectionOptions, "fullDocument" | "watch">;
 };

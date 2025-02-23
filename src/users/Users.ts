@@ -112,8 +112,8 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 			const {
 				indexes: customIndexes,
 				schema: customSchema,
-				initialRoot: initialRootProps
-				// avatars: avatarsOptions
+				initialRoot: initialRootProps,
+				collection: collectionOptions
 			} = this.initOptions!;
 			
 			if (customSchema) {
@@ -130,7 +130,7 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 				properties: { ...basisSchema.properties, ...customSchema?.properties }
 			};
 			
-			this.collection = await this.collections.ensure<UserDoc>("users", { jsonSchema });
+			this.collection = await this.collections.ensure<UserDoc>("users", { ...collectionOptions, schema });
 			
 			this.collection.ensureIndexes([ ...indexes, ...customIndexes ?? [] ]);
 			
@@ -170,14 +170,15 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 			const {
 				roles: rolesOptions,
 				orgs: orgsOptions,
-				sessions: sessionsOptions
-				// avatars: avatarsOptions
+				sessions: sessionsOptions,
+				avatars: avatarsOptions,
+				collection: { quiet } = {}
 			} = this.initOptions!;
 			
-			this.roles = new Roles<AS>(this, rolesOptions);
-			this.orgs = new Orgs<AS>(this, orgsOptions);
-			this.sessions = new Sessions<AS>(this, sessionsOptions);
-			this.avatars = new Avatars<AS>(this/* , avatarsOptions */);
+			this.roles = new Roles<AS>(this, { ...rolesOptions, collection: { quiet, ...rolesOptions?.collection } });
+			this.orgs = new Orgs<AS>(this, { ...orgsOptions, collection: { quiet, ...orgsOptions?.collection } });
+			this.sessions = new Sessions<AS>(this, { ...sessionsOptions, collection: { quiet, ...sessionsOptions?.collection } });
+			this.avatars = new Avatars<AS>(this, { ...avatarsOptions, collection: { quiet, ...avatarsOptions?.collection } });
 			
 			await this.roles.init();
 			await this.orgs.preinit();

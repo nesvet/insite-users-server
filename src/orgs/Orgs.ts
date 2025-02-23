@@ -61,7 +61,8 @@ export class Orgs<AS extends AbilitiesSchema> extends Map<string, Org<AS>> {
 			const {
 				schema: customSchema,
 				indexes: customIndexes,
-				null: nullProps
+				null: nullProps,
+				collection: collectionOptions
 			} = this.preinitOptions!;
 			
 			if (customSchema) {
@@ -79,7 +80,7 @@ export class Orgs<AS extends AbilitiesSchema> extends Map<string, Org<AS>> {
 			};
 			
 			this.collection = Object.assign(
-				await this.collections.ensure<OrgDoc>("orgs", { jsonSchema }),
+				await this.collections.ensure<OrgDoc>("orgs", { ...collectionOptions, schema }),
 				{
 					deleteOne: preventDirectDelete,
 					deleteMany: preventDirectDelete

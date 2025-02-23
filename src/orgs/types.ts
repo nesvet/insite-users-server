@@ -1,4 +1,4 @@
-import { CollectionIndexes, CollectionSchema } from "insite-db";
+import { CollectionIndexes, CollectionOptions, CollectionSchema } from "insite-db";
 
 
 export type OrgDoc = {
@@ -14,4 +14,5 @@ export type OrgsOptions = {
 	schema?: CollectionSchema;
 	indexes?: CollectionIndexes;
 	null?: Partial<OrgDoc>;
+	collection?: Omit<CollectionOptions, "fullDocument" | "watch">;
 };

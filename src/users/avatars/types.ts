@@ -1,4 +1,4 @@
-import type { Binary } from "insite-db";
+import type { Binary, CollectionOptions } from "insite-db";
 
 
 export type AvatarDoc = {
@@ -11,5 +11,5 @@ export type AvatarDoc = {
 };
 
 export type AvatarsOptions = {
-	//
+	collection?: Omit<CollectionOptions, "fullDocument" | "watch">;
 };

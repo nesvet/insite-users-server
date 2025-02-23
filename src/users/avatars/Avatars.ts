@@ -1,15 +1,15 @@
 import type { AbilitiesSchema } from "insite-common";
 import { Binary, type WatchedCollection } from "insite-db";
 import type { Users } from "../Users";
-import { schema as jsonSchema } from "./schema";
-import type { AvatarDoc } from "./types";
-// import { AvatarsOptions } from "./types";
+import type { AvatarDoc, AvatarsOptions } from "./types";
 
 
 export class Avatars<AS extends AbilitiesSchema> {
-	constructor(users: Users<AS>/* , options: AvatarsOptions = {} */) {
+	constructor(users: Users<AS>, options: AvatarsOptions = {}) {
 		this.users = users;
 		this.collections = users.collections;
+		
+		this.initOptions = options;
 		
 	}
 	
@@ -21,6 +21,8 @@ export class Avatars<AS extends AbilitiesSchema> {
 	
 	collection!: WatchedCollection<AvatarDoc>;
 	
+	private initOptions?;
+	
 	#isInited = false;
 	
 	async init() {
@@ -28,7 +30,11 @@ export class Avatars<AS extends AbilitiesSchema> {
 		if (!this.#isInited) {
 			this.#isInited = true;
 			
-			this.collection = await this.collections.ensure<AvatarDoc>("users.avatars", { jsonSchema });
+			const {
+				collection: collectionOptions
+			} = this.initOptions!;
+			
+			this.collection = await this.collections.ensure<AvatarDoc>("users.avatars", { ...collectionOptions, schema });
 			
 			await this.#maintain();
 		}

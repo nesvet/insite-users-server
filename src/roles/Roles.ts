@@ -75,7 +75,8 @@ export class Roles<AS extends AbilitiesSchema> extends Map<string, Role<AS>> {
 			
 			const {
 				schema: customSchema,
-				indexes: customIndexes
+				indexes: customIndexes,
+				collection: collectionOptions
 			} = this.initOptions!;
 			
 			if (customSchema) {
@@ -93,7 +94,7 @@ export class Roles<AS extends AbilitiesSchema> extends Map<string, Role<AS>> {
 			};
 			
 			this.collection = Object.assign(
-				await this.collections.ensure<RoleDoc>("roles", { jsonSchema }),
+				await this.collections.ensure<RoleDoc>("roles", { ...collectionOptions, schema }),
 				{
 					deleteOne: preventDirectDelete,
 					deleteMany: preventDirectDelete

@@ -45,7 +45,8 @@ export class Sessions<AS extends AbilitiesSchema> extends Map<string, Session<AS
 			
 			const {
 				schema: customSchema,
-				indexes: customIndexes
+				indexes: customIndexes,
+				collection: collectionOptions
 			} = this.initOptions!;
 			
 			if (customSchema) {
@@ -63,7 +64,7 @@ export class Sessions<AS extends AbilitiesSchema> extends Map<string, Session<AS
 			};
 			
 			this.collection = Object.assign(
-				await this.collections.ensure<SessionDoc>("sessions", { jsonSchema }),
+				await this.collections.ensure<SessionDoc>("sessions", { ...collectionOptions, schema }),
 				{
 					expireAfterSeconds
 				}

@@ -1,4 +1,4 @@
-import { CollectionIndexes, CollectionSchema } from "insite-db";
+import { CollectionIndexes, CollectionOptions, CollectionSchema } from "insite-db";
 
 
 export type SessionDoc = {
@@ -19,4 +19,5 @@ export type SessionDoc = {
 export type SessionsOptions = {
 	schema?: CollectionSchema;
 	indexes?: CollectionIndexes;
+	collection?: Omit<CollectionOptions, "fullDocument" | "watch">;
 };
