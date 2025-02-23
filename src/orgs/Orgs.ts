@@ -92,6 +92,7 @@ export class Orgs<AS extends AbilitiesSchema> extends Map<string, Org<AS>> {
 				}
 			);
 			
+			// TODO: customIndexes should be moved to collectionOptions
 			this.collection.ensureIndexes([ ...indexes, ...customIndexes ?? [] ]);
 			
 			this.null = Object.assign(
