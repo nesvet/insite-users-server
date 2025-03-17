@@ -33,3 +33,8 @@ export type Options<AS> = {
 	avatars?: AvatarsOptions;
 	collection?: Omit<CollectionOptions, "fullDocument" | "watch">;
 };
+
+export type NewUser =
+	Omit<UserDoc, "_id" | "createdAt" | "job" | "meta" | "name" | "org"> &
+	Partial<Pick<UserDoc, "job" | "meta" | "org">> &
+	{ name: Partial<UserDoc["name"]> };

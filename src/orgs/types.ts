@@ -16,3 +16,7 @@ export type OrgsOptions = {
 	null?: Partial<OrgDoc>;
 	collection?: Omit<CollectionOptions, "fullDocument" | "watch">;
 };
+
+export type NewOrg =
+	Omit<OrgDoc, "_id" | "createdAt" | "meta" | "note" | "title"> &
+	Partial<Pick<OrgDoc, "meta" | "note" | "title">>;

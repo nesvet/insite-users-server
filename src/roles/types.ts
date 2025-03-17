@@ -18,3 +18,7 @@ export type RolesOptions = {
 	root?: Partial<RoleDoc>;
 	collection?: Omit<CollectionOptions, "fullDocument" | "watch">;
 };
+
+export type NewRole =
+	Omit<RoleDoc, "abilities" | "createdAt" | "description" | "involves" | "meta" | "title"> &
+	Partial<Pick<RoleDoc, "description" | "involves" | "meta" | "title">>;

@@ -26,7 +26,7 @@ import type { SessionDoc } from "../sessions/types";
 import { Avatars } from "./avatars";
 import { basisSchema } from "./schema";
 import { User } from "./User";
-import type { Options, UserDoc } from "./types";
+import type { NewUser, Options, UserDoc } from "./types";
 
 
 const indexes: CollectionIndexes = [
@@ -242,12 +242,14 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 		return this.#initPromise;
 	}
 	
-	async create({ email, password, roles, name, org, job, ...restProps }: Omit<UserDoc, "_id" | "createdAt">) {
+	async create({ email, password, roles, name, org, job, ...restProps }: NewUser) {
 		if (this.byEmail.has(email))
 			throw new Error("User exists");
 		
+		const _id = newObjectIdString();
+		
 		await this.collection.insertOne({
-			_id: newObjectIdString(),
+			_id,
 			email,
 			password: await argon2.hash(password),
 			roles: this.isInited ? this.roles.cleanUpIds(roles) : roles,
@@ -263,7 +265,7 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 			createdAt: Date.now()
 		});
 		
-		return true;
+		return _id;
 	}
 	
 	async updateUser(_id: string, updates: Omit<UserDoc, "_id" | "createdAt">, byUser?: User<AS>) {

@@ -19,7 +19,7 @@ import {
 import type { User, Users } from "../users";
 import { Org } from "./Org";
 import { basisSchema } from "./schema";
-import type { OrgDoc, OrgsOptions } from "./types";
+import type { NewOrg, OrgDoc, OrgsOptions } from "./types";
 
 
 const indexes: CollectionIndexes = [
@@ -258,16 +258,20 @@ export class Orgs<AS extends AbilitiesSchema> extends Map<string, Org<AS>> {
 	
 	updateDebounced = debounce(this.update, 250);
 	
-	create({ title, note, ...restProps }: Omit<OrgDoc, "_id" | "createdAt" | "owners">, ownerId?: string) {
-		return this.collection.insertOne({
-			_id: newObjectIdString(),
+	async create({ title, note, ...restProps }: NewOrg) {
+		
+		const _id = newObjectIdString();
+		
+		await this.collection.insertOne({
+			_id,
 			title: title ?? "",
 			note: note ?? "",
-			owners: ownerId ? [ ownerId ] : [],
 			meta: {},
-			...deleteProps(restProps, [ "_id", "owners" ]),
+			...deleteProps(restProps, [ "_id" ]),
 			createdAt: Date.now()
 		});
+		
+		return _id;
 	}
 	
 	async updateOrg(_id: string, updates: Omit<OrgDoc, "_id" | "createdAt">, byUser?: User<AS>) {

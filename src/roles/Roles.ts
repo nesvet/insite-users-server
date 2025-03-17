@@ -12,7 +12,7 @@ import type { AbilityParam, GenericAbilities } from "../abilities/types";
 import type { Users } from "../users";
 import { Role } from "./Role";
 import { basisSchema } from "./schema";
-import type { RoleDoc, RolesOptions } from "./types";
+import type { NewRole, RoleDoc, RolesOptions } from "./types";
 
 
 const indexes: CollectionIndexes = [
@@ -244,8 +244,9 @@ export class Roles<AS extends AbilitiesSchema> extends Map<string, Role<AS>> {
 	
 	updateDebounced = debounce(this.update, 100);
 	
-	create({ _id, involves, title, description, ...restProps }: Omit<RoleDoc, "abilities" | "createdAt">) {
-		return this.collection.insertOne({
+	async create({ _id, involves, title, description, ...restProps }: NewRole) {
+		
+		await this.collection.insertOne({
 			_id,
 			involves: involves || [],
 			abilities: {},
@@ -255,6 +256,8 @@ export class Roles<AS extends AbilitiesSchema> extends Map<string, Role<AS>> {
 			...deleteProps(restProps, [ "abilities" ]),
 			createdAt: Date.now()
 		});
+		
+		return _id;
 	}
 	
 	async updateRole(roleId: string, updates: Omit<RoleDoc, "abilities" | "createdAt">) {
