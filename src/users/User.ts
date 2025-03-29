@@ -245,7 +245,6 @@ export class User<AS extends AbilitiesSchema> {
 				}
 			});
 		
-		return null;
 	}
 	
 	updateIsOnline = debounce(() => {
