@@ -1,8 +1,11 @@
 import { Err } from "@nesvet/n";
 
 
+type Payload = Record<string, unknown>;
+
+
 export class UnauthorizedError extends Err {
-	constructor(payload?: object) {
+	constructor(payload?: Payload) {
 		super("Unauthorized", "unauthorized", payload);
 		
 	}
@@ -15,18 +18,18 @@ export class UnauthorizedError extends Err {
 type SubordinationType = "_id" | "permissiveIds" | "slaveIds";
 
 export class SubordinationError extends Err {
-	constructor(payload?: object);
-	constructor(type: SubordinationType, payload?: object);
-	constructor(type: SubordinationType, ids: string[] | string, payload?: object);
-	constructor(type?: SubordinationType | object, ids?: string[] | object | string, payload?: object) {
+	constructor(payload?: Payload);
+	constructor(type: SubordinationType, payload?: Payload);
+	constructor(type: SubordinationType, ids: string[] | string, payload?: Payload);
+	constructor(type?: Payload | SubordinationType, ids?: Payload | string[] | string, payload?: Payload) {
 		switch (arguments.length) {
 			case 1:
-				payload = type as object;
+				payload = type as Payload;
 				type = undefined;
 				break;
 			
 			case 2:
-				payload = ids as object;
+				payload = ids as Payload;
 				ids = undefined;
 		}
 		
@@ -44,7 +47,7 @@ export class SubordinationError extends Err {
 
 
 export class PermissionError extends Err {
-	constructor(payload?: object) {
+	constructor(payload?: Payload) {
 		super("Insufficient permissions", "permissions", payload);
 		
 	}
