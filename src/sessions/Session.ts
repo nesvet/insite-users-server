@@ -62,13 +62,28 @@ export class Session<AS extends AbilitiesSchema> {
 		return this.#sessions.collection.updateOne({ _id: this._id }, { $set: updates });
 	}
 	
-	offline() {
+	async online() {
 		
-		const updates = { isOnline: false };
+		if (!this.isOnline) {
+			const updates = { isOnline: true };
+			
+			this.update(updates);
+			
+			await this.#sessions.collection.updateOne({ _id: this._id }, { $set: updates });
+		}
 		
-		this.update(updates);
+	}
+	
+	async offline() {
 		
-		return this.#sessions.collection.updateOne({ _id: this._id }, { $set: updates });
+		if (this.isOnline) {
+			const updates = { isOnline: false };
+			
+			this.update(updates);
+			
+			await this.#sessions.collection.updateOne({ _id: this._id }, { $set: updates });
+		}
+		
 	}
 	
 	delete() {
