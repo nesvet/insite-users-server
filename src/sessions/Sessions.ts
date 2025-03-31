@@ -1,7 +1,12 @@
-import crypto from "node:crypto";
-import { deleteProps, random, removeAll } from "@nesvet/n";
+import { randomBytes } from "node:crypto";
+import { deleteProps, removeAll } from "@nesvet/n";
 import type { AbilitiesSchema } from "insite-common";
-import { ChangeStreamDocument, CollectionIndexes, WatchedCollection } from "insite-db";
+import {
+	ChangeStreamDocument,
+	CollectionIndexes,
+	newObjectIdString,
+	WatchedCollection
+} from "insite-db";
 import { User } from "../users/User";
 import type { Users } from "../users";
 import { basisSchema } from "./schema";
@@ -118,13 +123,7 @@ export class Sessions<AS extends AbilitiesSchema> extends Map<string, Session<AS
 	};
 	
 	uid() {
-		
-		let _id;
-		do
-			_id = `${crypto.randomBytes(random(8, 16)).toString("hex")}$${crypto.randomBytes(random(8, 16)).toString("hex")}`;
-		while (this.has(_id));
-		
-		return _id;
+		return `${newObjectIdString()}~${randomBytes(32).toString("base64url")}`;
 	}
 	
 	load(sessionDoc: SessionDoc) {
