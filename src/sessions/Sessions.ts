@@ -104,7 +104,7 @@ export class Sessions<AS extends AbilitiesSchema> extends Map<string, Session<AS
 				if (!this.has(next.documentKey._id))
 					new Session<AS>(this, next.fullDocument);
 				
-				this.users.get(next.fullDocument.user)?.trimSessions();
+				void this.users.get(next.fullDocument.user)?.trimSessions();
 				
 				break;
 			

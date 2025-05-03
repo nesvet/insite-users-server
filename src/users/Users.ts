@@ -29,6 +29,9 @@ import { User } from "./User";
 import type { NewUser, Options, UserDoc } from "./types";
 
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+
 const indexes: CollectionIndexes = [
 	[ { email: 1 }, { unique: true } ],
 	[ { org: 1 } ]
@@ -46,7 +49,7 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 		this._events = eventEmitter._events;
 		this._eventsCount = eventEmitter._eventsCount;
 		this.emit = eventEmitter.emit;
-		this.on = eventEmitter.on;
+		this.on = eventEmitter.on as unknown as (...args: any[]) => this;
 		this.once = eventEmitter.once;
 		this.addListener = eventEmitter.addListener;
 		this.off = eventEmitter.off;
@@ -58,14 +61,22 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 		
 		this.initOptions = options;
 		
-		this.init();
+		void this.init();
 		
 	}
 	
 	_events;
 	_eventsCount;
 	emit;
-	on;
+	
+	on(event: "user-create" | "user-is-online" | "user-permissions-change", callback: (user: User<AS>) => void): this;
+	on(event: "session-delete", callback: (session: Session<AS>) => void): this;
+	on<T extends string | symbol>(event: T, callback: (...args: any[]) => void, context?: any) {
+		this.#eventEmitter.on(event, callback, context);
+		
+		return this;
+	}
+	
 	once;
 	addListener;
 	off;
@@ -169,7 +180,7 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 			await this.roles.init();
 			await this.orgs.preinit();
 			await this.preinit();
-			await this.orgs.init();
+			this.orgs.init();
 			await this.avatars.init();
 			
 			this.update(true);
@@ -192,15 +203,15 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 				break;
 			
 			case "replace":
-				this.get(next.documentKey._id)?.update(next.fullDocument);
+				void this.get(next.documentKey._id)?.update(next.fullDocument);
 				break;
 			
 			case "update":
-				this.get(next.documentKey._id)?.update(next.updateDescription.updatedFields!);
+				void this.get(next.documentKey._id)?.update(next.updateDescription.updatedFields!);
 				break;
 			
 			case "delete":
-				this.get(next.documentKey._id)?.delete();
+				void this.get(next.documentKey._id)?.delete();
 		}
 		
 	};

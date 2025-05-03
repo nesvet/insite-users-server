@@ -15,7 +15,7 @@ export class Org<AS extends AbilitiesSchema> {
 		this._id = orgDoc._id;
 		orgs.set(this._id, this);
 		
-		this.update(orgDoc);
+		void this.update(orgDoc);
 		
 	}
 	
@@ -51,7 +51,6 @@ export class Org<AS extends AbilitiesSchema> {
 		
 		if (ownerIds) {
 			this.ownerIds = ownerIds;
-			
 			
 			const snapshot = this.ownerIds.join(",");
 			

@@ -27,7 +27,7 @@ export class User<AS extends AbilitiesSchema> {
 		this._id = userDoc._id;
 		users.set(this._id, this);
 		
-		this.update(userDoc);
+		void this.update(userDoc);
 		
 		if (users.isInited)
 			users.emit("user-create", this);

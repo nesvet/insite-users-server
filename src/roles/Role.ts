@@ -14,7 +14,7 @@ export class Role<AS extends AbilitiesSchema> {
 		this._id = roleDoc._id;
 		roles.set(this._id, this);
 		
-		this.update(roleDoc);
+		void this.update(roleDoc);
 		
 	}
 	

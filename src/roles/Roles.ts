@@ -140,12 +140,11 @@ export class Roles<AS extends AbilitiesSchema> extends Map<string, Role<AS>> {
 				break;
 			
 			case "update":
-				this.get(next.documentKey._id)?.update(next.updateDescription.updatedFields!, next);
+				void this.get(next.documentKey._id)?.update(next.updateDescription.updatedFields!);
 				break;
 			
 			case "delete":
-				this.get(next.documentKey._id)?.delete();
-				this.users.emit("roles-role-update", null, next);
+				void this.get(next.documentKey._id)?.delete();
 		}
 		
 	};

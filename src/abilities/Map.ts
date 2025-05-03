@@ -294,7 +294,7 @@ export class AbilitiesMap<AS extends AbilitiesSchema> extends Map<string, Abilit
 							paramSchema.min ?? 0
 						) :
 						paramSchema.min ?? 0
-				) as AbilityParamNumber;
+				);
 			
 			default/* paramSchema.type === "items" */:
 				return (
@@ -309,7 +309,7 @@ export class AbilitiesMap<AS extends AbilitiesSchema> extends Map<string, Abilit
 	adjust(abilities: GenericAbilities, parent?: AbilitySchema | null): Abilities<AS> {
 		const adjustedAbilities: GenericAbilities = {};
 		
-		for (const [ _id, ability ] of Object.entries(abilities) as [ string, Ability ][]) {
+		for (const [ _id, ability ] of Object.entries(abilities)) {
 			const schema = this.get(_id, parent);
 			
 			if (schema)
@@ -398,7 +398,7 @@ export class AbilitiesMap<AS extends AbilitiesSchema> extends Map<string, Abilit
 		const schema = typeof schemaOrLongId == "string" ? this.get(schemaOrLongId) : schemaOrLongId;
 		
 		if (!schema)
-			throw new Error(`No such ability: ${schemaOrLongId}`);
+			throw new Error(`No such ability: ${schemaOrLongId as string}`);
 		
 		this.merge(target, this.getDefaultAbilities(schema));
 		
@@ -411,7 +411,7 @@ export class AbilitiesMap<AS extends AbilitiesSchema> extends Map<string, Abilit
 		const schema = typeof schemaOrLongId == "string" ? this.get(schemaOrLongId) : schemaOrLongId;
 		
 		if (!schema)
-			throw new Error(`No such ability: ${schemaOrLongId}`);
+			throw new Error(`No such ability: ${schemaOrLongId as string}`);
 		
 		(function resolve(_schema) {
 			deletePath(target, _schema.longId);

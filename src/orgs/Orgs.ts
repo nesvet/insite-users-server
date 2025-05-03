@@ -157,12 +157,11 @@ export class Orgs<AS extends AbilitiesSchema> extends Map<string, Org<AS>> {
 				break;
 			
 			case "update":
-				this.get(next.documentKey._id)?.update(next.updateDescription.updatedFields!, next);
+				void this.get(next.documentKey._id)?.update(next.updateDescription.updatedFields!);
 				break;
 			
 			case "delete":
-				this.get(next.documentKey._id)?.delete();
-				this.users.emit("orgs-org-update", null, next);
+				void this.get(next.documentKey._id)?.delete();
 		}
 		
 	};

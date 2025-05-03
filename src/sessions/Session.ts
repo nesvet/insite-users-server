@@ -21,7 +21,7 @@ export class Session<AS extends AbilitiesSchema> {
 			
 			this.update(sessionDoc);
 		} else
-			sessions.collection.deleteOne({ _id: sessionDoc._id });
+			void sessions.collection.deleteOne({ _id: sessionDoc._id });
 		
 	}
 	
@@ -43,7 +43,7 @@ export class Session<AS extends AbilitiesSchema> {
 			this.isOnline = isOnline;
 			
 			if (this.#sessions.isInited && this.user.isOnline !== this.isOnline)
-				this.user.updateIsOnline();
+				void this.user.updateIsOnlineDebounced();
 		}
 		
 		Object.assign(this, restProps);
