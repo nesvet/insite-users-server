@@ -1,11 +1,10 @@
 import type { AbilitiesSchema } from "insite-common";
-import type { ChangeStreamDocument } from "insite-db";
 import { User } from "../users/User";
 import type { Orgs } from "./Orgs";
 import type { OrgDoc } from "./types";
 
 
-const snapshots = new Map();
+const snapshots = new WeakMap();
 
 
 export class Org<AS extends AbilitiesSchema> {
@@ -39,7 +38,7 @@ export class Org<AS extends AbilitiesSchema> {
 	
 	ownerIds: string[] = [];
 	
-	update({ _id, title, owners: ownerIds, ...restProps }: Partial<OrgDoc>, next?: ChangeStreamDocument<OrgDoc>) {
+	update({ _id, title, owners: ownerIds, ...restProps }: Partial<OrgDoc>) {
 		
 		Object.assign(this, restProps);
 		
@@ -54,27 +53,25 @@ export class Org<AS extends AbilitiesSchema> {
 			
 			const snapshot = this.ownerIds.join(",");
 			
-			if (snapshot !== snapshots.get(this._id)) {
-				snapshots.set(this._id, snapshot);
+			if (snapshot !== snapshots.get(this)) {
+				snapshots.set(this, snapshot);
 				
 				if (this.orgs.users.isInited)
-					this.orgs.updateDebounced();
-				
-				this.orgs.users.emit("orgs-org-update", this, next);
+					this.orgs.update();
 			}
 		}
 		
 	}
 	
-	delete() {
+	async delete() {
 		
 		this.orgs.delete(this._id);
 		
-		snapshots.delete(this._id);
+		snapshots.delete(this);
 		
-		this.orgs.replace(this._id);
+		await this.orgs.replace(this._id);
 		
-		this.orgs.updateDebounced();
+		this.orgs.update();
 		
 	}
 	

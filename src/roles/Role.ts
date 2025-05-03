@@ -1,10 +1,9 @@
 import type { Abilities, AbilitiesSchema } from "insite-common";
-import type { ChangeStreamDocument } from "insite-db";
 import { Roles } from "./Roles";
 import { RoleDoc } from "./types";
 
 
-const snapshots = new Map();
+const snapshots = new WeakMap();
 
 
 export class Role<AS extends AbilitiesSchema> {
@@ -32,7 +31,7 @@ export class Role<AS extends AbilitiesSchema> {
 	abilities: Abilities<AS> = {};
 	inheritedAbilities: Abilities<AS> = {};
 	
-	update({ _id, involves: ownInvolveIds, abilities: ownAbilities, title, ...restProps }: Partial<RoleDoc>, next?: ChangeStreamDocument<RoleDoc>) {
+	update({ _id, involves: ownInvolveIds, abilities: ownAbilities, title, ...restProps }: Partial<RoleDoc>) {
 		Object.assign(this, restProps);
 		
 		if (ownInvolveIds)
@@ -52,12 +51,11 @@ export class Role<AS extends AbilitiesSchema> {
 				JSON.stringify(this.ownAbilities)
 			].join("\n");
 			
-			if (snapshot !== snapshots.get(this._id)) {
-				snapshots.set(this._id, snapshot);
+			if (snapshot !== snapshots.get(this)) {
+				snapshots.set(this, snapshot);
 				
 				if (this.#roles.users.isInited)
-					this.#roles.updateDebounced()
-						.then(() => this.#roles.users.emit("roles-role-update", this, next));
+					this.#roles.update();
 			}
 		}
 		
@@ -67,9 +65,9 @@ export class Role<AS extends AbilitiesSchema> {
 		
 		this.#roles.delete(this._id);
 		
-		snapshots.delete(this._id);
+		snapshots.delete(this);
 		
-		this.#roles.updateDebounced();
+		this.#roles.update();
 		
 	}
 	

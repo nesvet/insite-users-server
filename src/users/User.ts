@@ -14,8 +14,8 @@ import type { UserDoc } from "./types";
 import type { Users } from "./Users";
 
 
-const rolesSnapshots = new Map();
-const permissionsSnapshots = new Map();
+const rolesSnapshots = new WeakMap();
+const permissionsSnapshots = new WeakMap();
 
 const staticUrl = process.env.INSITE_STATIC_URL ?? "http://localhost:8080";
 
@@ -106,10 +106,13 @@ export class User<AS extends AbilitiesSchema> {
 			
 			const snapshot = this.ownRoleIds.join(",");
 			
-			if (snapshot !== rolesSnapshots.get(this._id)) {
-				rolesSnapshots.set(this._id, snapshot);
-				this.updateRoles();
-				isRolesUpdated = true;
+			if (snapshot !== rolesSnapshots.get(this)) {
+				rolesSnapshots.set(this, snapshot);
+				
+				if (this.#users.isInited) {
+					this.updateRoles();
+					isRolesUpdated = true;
+				}
 			}
 		}
 		
@@ -126,106 +129,102 @@ export class User<AS extends AbilitiesSchema> {
 			this.avatarUrl = avatar && `${staticUrl}/avatars/${this._id}-${avatar}.webp`;
 		}
 		
-		if (isRolesUpdated || isOrgUpdated) {
-			this.updatePermissions();
-			
-			if (isLastNameUpdated)
-				this.#users.isSortRequired = true;
-			
-			if (this.#users.isInited)
-				this.#users.updateDebounced();
-			
-		} else if (isLastNameUpdated)
-			this.#users.sortDebounced();
+		if (this.#users.isInited)
+			if (isRolesUpdated || isOrgUpdated) {
+				this.updatePermissions();
+				
+				if (isLastNameUpdated)
+					this.#users.isSortRequired = true;
+				
+				this.#users.update();
+			} else if (isLastNameUpdated)
+				this.#users.sort();
 		
 	}
 	
 	updateRoles() {
 		
-		if (this.#users.isInited) {
-			this.ownRoles = [];
-			this.roles.clear();
-			this.slaveRoles.clear();
-			empty(this.abilities);
-			
-			for (const roleId of this.ownRoleIds) {
-				const role = this.#users.roles.get(roleId);
-				if (role) {
-					
-					this.ownRoles.push(role);
-					this.roles.add(role);
-					for (const involvedRole of role.involves) {
-						this.roles.add(involvedRole);
-						this.slaveRoles.add(involvedRole);
-					}
-					
-					this.slaveRoleIds = _ids(this.slaveRoles);
-					
-					this.#users.abilities.merge(this.abilities as GenericAbilities, role.abilities as GenericAbilities);
+		this.ownRoles = [];
+		this.roles.clear();
+		this.slaveRoles.clear();
+		empty(this.abilities);
+		
+		for (const roleId of this.ownRoleIds) {
+			const role = this.#users.roles.get(roleId);
+			if (role) {
+				
+				this.ownRoles.push(role);
+				this.roles.add(role);
+				for (const involvedRole of role.involves) {
+					this.roles.add(involvedRole);
+					this.slaveRoles.add(involvedRole);
 				}
+				
+				this.slaveRoleIds = _ids(this.slaveRoles);
+				
+				this.#users.abilities.merge(this.abilities as GenericAbilities, role.abilities as GenericAbilities);
 			}
-			
-			if (this.roles.has(this.#users.roles.root))
-				this.isRoot = true;
-			
-			this.trimSessions();
 		}
+		
+		if (this.roles.has(this.#users.roles.root))
+			this.isRoot = true;
+		
+		void this.trimSessions();
 		
 	}
 	
 	updatePermissions() {
 		
-		if (this.#users.isInited) {
-			this.slaveOrgs.clear();
-			this.slaveUsers.clear();
-			this.slaves.clear();
-			const slaveIds = new Set<string>();
-			
-			for (const org of this.#users.orgs.sorted)
-				if ((org.ownerUsers.has(this) || this.isRoot) && !this.slaveOrgs.has(org)) {
-					this.slaveOrgs.add(org);
-					this.slaves.add(org);
-					slaveIds.add(org._id);
-					for (const slaveOrg of org.slaveOrgs) {
-						this.slaveOrgs.add(slaveOrg);
-						this.slaves.add(slaveOrg);
-						slaveIds.add(slaveOrg._id);
-					}
+		this.slaveOrgs.clear();
+		this.slaveUsers.clear();
+		this.slaves.clear();
+		const slaveIds = new Set<string>();
+		
+		for (const org of this.#users.orgs.sorted)
+			if ((org.ownerUsers.has(this) || this.isRoot) && !this.slaveOrgs.has(org)) {
+				this.slaveOrgs.add(org);
+				this.slaves.add(org);
+				slaveIds.add(org._id);
+				for (const slaveOrg of org.slaveOrgs) {
+					this.slaveOrgs.add(slaveOrg);
+					this.slaves.add(slaveOrg);
+					slaveIds.add(slaveOrg._id);
 				}
-			
-			for (const org of new Set([ this.org, ...this.slaveOrgs, this.#users.orgs.null ]))
-				for (const user of org.users)
-					if (user !== this && (hasAny(this.slaveRoles, user.ownRoles) || !user.ownRoles.length)) {
-						this.slaveUsers.add(user);
-						this.slaves.add(user);
-						slaveIds.add(user._id);
-					}
-			
-			this.slaveIds = [ ...slaveIds ];
-			
-			const permissiveOrgIds = [];
-			if (this.org._id) {
-				permissiveOrgIds.push(this.org._id);
-				for (const slaveOrg of this.org.slaveOrgs)
-					if (!this.slaveOrgs.has(slaveOrg))
-						permissiveOrgIds.push(slaveOrg._id);
 			}
+		
+		for (const org of new Set([ this.org, ...this.slaveOrgs, this.#users.orgs.null ]))
+			for (const user of org.users)
+				if (user !== this && (hasAny(this.slaveRoles, user.ownRoles) || !user.ownRoles.length)) {
+					this.slaveUsers.add(user);
+					this.slaves.add(user);
+					slaveIds.add(user._id);
+				}
+		
+		this.slaveIds = [ ...slaveIds ];
+		
+		const permissiveOrgIds = [];
+		if (this.org._id) {
+			permissiveOrgIds.push(this.org._id);
+			for (const slaveOrg of this.org.slaveOrgs)
+				if (!this.slaveOrgs.has(slaveOrg))
+					permissiveOrgIds.push(slaveOrg._id);
+		}
+		
+		this.permissiveIds = [ ...permissiveOrgIds, this._id, ...slaveIds ];
+		
+		
+		const snapshot = [
+			this.permissiveIds.join(","),
+			this.ownRoleIds.join(","),
+			JSON.stringify(this.abilities),
+			this.slaveRoleIds.join(",")
+		].join("\n");
+		
+		if (snapshot !== permissionsSnapshots.get(this)) {
+			permissionsSnapshots.set(this, snapshot);
 			
-			this.permissiveIds = [ ...permissiveOrgIds, this._id, ...slaveIds ];
-			
-			
-			const snapshot = [
-				this.permissiveIds.join(","),
-				this.ownRoleIds.join(","),
-				JSON.stringify(this.abilities),
-				this.slaveRoleIds.join(",")
-			].join("\n");
-			
-			if (snapshot !== permissionsSnapshots.get(this._id)) {
-				permissionsSnapshots.set(this._id, snapshot);
-				
+			if (this.#users.isInited)
 				this.#users.emit("user-permissions-change", this);
-			}
 		}
 		
 	}
@@ -247,7 +246,7 @@ export class User<AS extends AbilitiesSchema> {
 		
 	}
 	
-	updateIsOnline = debounce(() => {
+	updateIsOnline() {
 		
 		let isOnline = false;
 		
@@ -262,9 +261,11 @@ export class User<AS extends AbilitiesSchema> {
 			this.#users.emit("user-is-online", this);
 		}
 		
-	}, 500);
+	}
 	
-	delete() {
+	updateIsOnlineDebounced = debounce(() => this.updateIsOnline(), 500);
+	
+	async delete() {
 		
 		this.org.users.delete(this);
 		
@@ -272,12 +273,12 @@ export class User<AS extends AbilitiesSchema> {
 		this.#users.byEmail.delete(this.email);
 		removeOne(this.#users.sorted, this);
 		
-		rolesSnapshots.delete(this._id);
-		permissionsSnapshots.delete(this._id);
+		rolesSnapshots.delete(this);
+		permissionsSnapshots.delete(this);
 		
-		this.#users.replace(this._id);
+		await this.#users.replace(this._id);
 		
-		this.#users.updateDebounced();
+		this.#users.update();
 		
 	}
 	

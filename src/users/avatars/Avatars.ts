@@ -24,13 +24,9 @@ export class Avatars<AS extends AbilitiesSchema> {
 	
 	private initOptions?;
 	
-	#isInited = false;
-	
 	async init() {
 		
-		if (!this.#isInited) {
-			this.#isInited = true;
-			
+		if (!this.users.isInited) {
 			const {
 				collection: collectionOptions
 			} = this.initOptions!;

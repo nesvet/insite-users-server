@@ -1,5 +1,4 @@
 import {
-	debounce,
 	deleteProps,
 	getAll,
 	intersection,
@@ -66,13 +65,9 @@ export class Roles<AS extends AbilitiesSchema> extends Map<string, Role<AS>> {
 	root;
 	private initOptions?;
 	
-	#isInited = false;
-	
 	async init() {
 		
-		if (!this.#isInited) {
-			this.#isInited = true;
-			
+		if (!this.users.isInited) {
 			const {
 				schema: customSchema,
 				indexes: customIndexes,
@@ -101,11 +96,11 @@ export class Roles<AS extends AbilitiesSchema> extends Map<string, Role<AS>> {
 				}
 			);
 			
-			this.collection.ensureIndexes([ ...indexes, ...customIndexes ?? [] ]);
+			await this.collection.ensureIndexes([ ...indexes, ...customIndexes ?? [] ]);
 			
 			await this.#maintain();
 			
-			for (const roleDoc of await this.collection.find().toArray()) {
+			for await (const roleDoc of this.collection.find()) {
 				if (this.abilities.adjust(roleDoc.abilities))
 					await this.collection.updateOne({ _id: roleDoc._id }, { $set: { abilities: roleDoc.abilities } });
 				
@@ -130,13 +125,12 @@ export class Roles<AS extends AbilitiesSchema> extends Map<string, Role<AS>> {
 	#handleCollectionChange = (next: ChangeStreamDocument<RoleDoc>) => {
 		switch (next.operationType) {
 			case "insert": {
-				const role = new Role<AS>(this, next.fullDocument);
-				this.users.emit("roles-role-update", role, next);
+				new Role<AS>(this, next.fullDocument);
 				break;
 			}
 			
 			case "replace":
-				this.get(next.documentKey._id)?.update(next.fullDocument, next);
+				void this.get(next.documentKey._id)?.update(next.fullDocument);
 				break;
 			
 			case "update":
@@ -232,16 +226,10 @@ export class Roles<AS extends AbilitiesSchema> extends Map<string, Role<AS>> {
 		
 		this.sorted = sorted;
 		
-		this.users.emit("roles-update");
-		
-		if (this.users.isInited) {
-			this.users.updateDebounced.clear();
+		if (this.users.isInited)
 			this.users.update(true);
-		}
 		
 	}
-	
-	updateDebounced = debounce(this.update, 100);
 	
 	async create({ _id, involves, title, description, ...restProps }: NewRole) {
 		

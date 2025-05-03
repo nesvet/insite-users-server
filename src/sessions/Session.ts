@@ -42,7 +42,7 @@ export class Session<AS extends AbilitiesSchema> {
 		if (isOnline !== undefined && this.isOnline !== isOnline) {
 			this.isOnline = isOnline;
 			
-			if (this.#sessions.isInited && this.user.isOnline !== this.isOnline)
+			if (this.#sessions.users.isInited && this.user.isOnline !== this.isOnline)
 				void this.user.updateIsOnlineDebounced();
 		}
 		

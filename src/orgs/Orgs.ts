@@ -1,6 +1,5 @@
 import {
 	_ids,
-	debounce,
 	deleteProps,
 	EmptyArray,
 	EmptySet,
@@ -93,7 +92,7 @@ export class Orgs<AS extends AbilitiesSchema> extends Map<string, Org<AS>> {
 			);
 			
 			// TODO: customIndexes should be moved to collectionOptions
-			this.collection.ensureIndexes([ ...indexes, ...customIndexes ?? [] ]);
+			await this.collection.ensureIndexes([ ...indexes, ...customIndexes ?? [] ]);
 			
 			this.null = Object.assign(
 				new Org<AS>(this, {
@@ -116,7 +115,7 @@ export class Orgs<AS extends AbilitiesSchema> extends Map<string, Org<AS>> {
 			
 			await this.#maintain();
 			
-			for (const orgDoc of await this.collection.find().toArray())
+			for await (const orgDoc of this.collection.find())
 				this.load(orgDoc);
 			
 			delete this.preinitOptions;
@@ -130,13 +129,9 @@ export class Orgs<AS extends AbilitiesSchema> extends Map<string, Org<AS>> {
 		
 	}
 	
-	#isInited = false;
-	
 	init() {
 		
-		if (!this.#isInited) {
-			this.#isInited = true;
-			
+		if (!this.users.isInited) {
 			this.update();
 			
 			this.collection.onChange(this.#handleCollectionChange);
@@ -147,13 +142,12 @@ export class Orgs<AS extends AbilitiesSchema> extends Map<string, Org<AS>> {
 	#handleCollectionChange = (next: ChangeStreamDocument<OrgDoc>) => {
 		switch (next.operationType) {
 			case "insert": {
-				const org = new Org<AS>(this, next.fullDocument);
-				this.users.emit("orgs-org-update", org, next);
+				new Org<AS>(this, next.fullDocument);
 				break;
 			}
 			
 			case "replace":
-				this.get(next.documentKey._id)?.update(next.fullDocument, next);
+				void this.get(next.documentKey._id)?.update(next.fullDocument);
 				break;
 			
 			case "update":
@@ -234,12 +228,8 @@ export class Orgs<AS extends AbilitiesSchema> extends Map<string, Org<AS>> {
 		
 		this.sorted = sorted;
 		
-		this.users.emit("orgs-update");
-		
-		if (this.users.isInited) {
-			this.users.updateDebounced.clear();
+		if (this.users.isInited)
 			this.users.update();
-		}
 		
 	}
 	
@@ -254,8 +244,6 @@ export class Orgs<AS extends AbilitiesSchema> extends Map<string, Org<AS>> {
 			)
 		);
 	}
-	
-	updateDebounced = debounce(this.update, 250);
 	
 	async create({ title, note, ...restProps }: NewOrg) {
 		

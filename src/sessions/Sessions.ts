@@ -41,13 +41,9 @@ export class Sessions<AS extends AbilitiesSchema> extends Map<string, Session<AS
 		expireAfterSeconds: number;
 	};
 	
-	isInited = false;
-	
 	async init() {
 		
-		if (!this.isInited) {
-			this.isInited = true;
-			
+		if (!this.users.isInited) {
 			const {
 				schema: customSchema,
 				indexes: customIndexes,
@@ -75,11 +71,11 @@ export class Sessions<AS extends AbilitiesSchema> extends Map<string, Session<AS
 				}
 			);
 			
-			this.collection.ensureIndexes([ ...indexes, ...customIndexes ?? [] ]);
+			await this.collection.ensureIndexes([ ...indexes, ...customIndexes ?? [] ]);
 			
 			await this.#maintain();
 			
-			for (const sessionDoc of await this.collection.find().toArray())
+			for await (const sessionDoc of this.collection.find())
 				this.load(sessionDoc);
 			
 			this.collection.onChange(this.#handleCollectionChange);

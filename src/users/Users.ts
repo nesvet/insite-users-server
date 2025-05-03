@@ -2,7 +2,6 @@ import * as argon2 from "argon2";
 import EventEmitter from "eventemitter3";
 import {
 	_ids,
-	debounce,
 	deleteProps,
 	removeAll,
 	StatefulPromise,
@@ -46,6 +45,7 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 			_events: Record<string, object>;
 			_eventsCount: number;
 		};
+		this.#eventEmitter = eventEmitter;
 		this._events = eventEmitter._events;
 		this._eventsCount = eventEmitter._eventsCount;
 		this.emit = eventEmitter.emit;
@@ -65,6 +65,7 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 		
 	}
 	
+	#eventEmitter;
 	_events;
 	_eventsCount;
 	emit;
@@ -97,7 +98,7 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 	bySessionId = new Map();
 	sorted: User<AS>[] = [];
 	
-	isSortRequired = false;
+	isSortRequired = true;
 	
 	#isPreinited = false;
 	
@@ -129,7 +130,7 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 			
 			this.collection = await this.collections.ensure<UserDoc>("users", { ...collectionOptions, schema });
 			
-			this.collection.ensureIndexes([ ...indexes, ...customIndexes ?? [] ]);
+			await this.collection.ensureIndexes([ ...indexes, ...customIndexes ?? [] ]);
 			
 			if (!await this.collection.countDocuments({ roles: "root" }))
 				await this.create({
@@ -145,7 +146,7 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 			
 			await this.#maintain();
 			
-			for (const userDoc of await this.collection.find().toArray())
+			for await (const userDoc of this.collection.find())
 				this.load(userDoc);
 		}
 		
@@ -162,8 +163,6 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 	protected async init() {
 		
 		if (!this.isInited) {
-			this.isInited = true;
-			
 			const {
 				roles: rolesOptions,
 				orgs: orgsOptions,
@@ -190,6 +189,8 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 			await this.sessions.init();
 			
 			delete this.initOptions;
+			
+			this.isInited = true;
 			
 			this.#initPromise.resolve(this);
 		}
@@ -230,8 +231,6 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 		
 	}
 	
-	sortDebounced = debounce(() => this.sort(), 250);
-	
 	update(shouldUpdateRoles?: boolean) {
 		if (shouldUpdateRoles)
 			for (const user of this.values())
@@ -244,8 +243,6 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 			this.sort();
 		
 	}
-	
-	updateDebounced = debounce(() => this.update(), 250);
 	
 	#initPromise = new StatefulPromise<this>();
 	
