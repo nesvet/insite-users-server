@@ -1,48 +1,48 @@
 {
-  "name": "insite-users-server",
+	"name": "insite-users-server",
   "version": "2.2.3",
-  "description": "inSite users server side",
-  "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "imports": {
-    "#lib": "./src/lib/index.js"
-  },
-  "exports": {
-    ".": "./dist/index.js",
-    "./ws": "./dist/ws.js"
-  },
-  "packageManager": "bun@1.2.9",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "bun .conveyer.js",
-    "postbuild": "tsc -p ."
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/nesvet/insite-users-server.git"
-  },
-  "keywords": [
-    "insite",
-    "users",
-    "server"
-  ],
-  "author": "Eugene Nesvetaev <dev@nesvet.dev> (https://nesvet.dev/)",
-  "license": "MIT",
-  "dependencies": {
-    "@nesvet/n": "^1.1.29",
-    "argon2": "^0.40.3",
-    "eventemitter3": "^5.0.1",
-    "insite-common": "^2.2.3",
-    "insite-db": "^2.2.3",
-    "insite-subscriptions-server": "^2.2.3",
-    "insite-ws": "^2.2.3",
-    "insite-ws-transfers": "^2.2.3"
-  },
-  "devDependencies": {
-    "@nesvet/conveyer": "^2.5.1",
-    "@nesvet/eslint-config": "^2.0.52",
-    "@types/node": "^22.14.1",
-    "typescript": "^5.8.3"
-  }
+	"description": "inSite users server side",
+	"type": "module",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"imports": {
+		"#lib": "./src/lib/index.js"
+	},
+	"exports": {
+		".": "./dist/index.js",
+		"./ws": "./dist/ws.js"
+	},
+	"packageManager": "bun@1.2.11",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"build": "bun .conveyer.js",
+		"postbuild": "tsc -p ."
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/nesvet/insite-users-server.git"
+	},
+	"keywords": [
+		"insite",
+		"users",
+		"server"
+	],
+	"author": "Eugene Nesvetaev <dev@nesvet.dev> (https://nesvet.dev/)",
+	"license": "MIT",
+	"dependencies": {
+		"@nesvet/n": "^1.2.0",
+		"argon2": "^0.40.3",
+		"eventemitter3": "^5.0.1",
+		"insite-common": "^2.3.0",
+		"insite-db": "^2.3.0",
+		"insite-subscriptions-server": "^2.3.0",
+		"insite-ws": "^2.3.0",
+		"insite-ws-transfers": "^2.3.0"
+	},
+	"devDependencies": {
+		"@nesvet/conveyer": "^2.5.2",
+		"@nesvet/eslint-config": "^2.1.1",
+		"@types/node": "^22.15.3",
+		"typescript": "^5.8.3"
+	}
 }
