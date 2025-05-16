@@ -17,7 +17,7 @@ import type { Users } from "./Users";
 const rolesSnapshots = new WeakMap();
 const permissionsSnapshots = new WeakMap();
 
-const staticUrl = process.env.INSITE_STATIC_URL ?? "http://localhost:8080";
+const staticUrl = process.env.INSITE_STATIC_URL ?? "";
 
 
 export class User<AS extends AbilitiesSchema> {
