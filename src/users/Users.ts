@@ -1,4 +1,4 @@
-import * as argon2 from "argon2";
+import { hash, verify } from "@node-rs/argon2";
 import EventEmitter from "eventemitter3";
 import {
 	_ids,
@@ -259,7 +259,7 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 		await this.collection.insertOne({
 			_id,
 			email,
-			password: await argon2.hash(password),
+			password: await hash(password),
 			roles: this.isInited ? this.roles.cleanUpIds(roles) : roles,
 			name: {
 				first: name.first ?? "",
@@ -305,7 +305,7 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 			throw new Error("emptypasswordisnotallowed");
 		
 		await Promise.all([
-			this.collection.updateOne({ _id }, { $set: { password: await argon2.hash(newPassword) } }),
+			this.collection.updateOne({ _id }, { $set: { password: await hash(newPassword) } }),
 			this.sessions.collection.deleteMany({ user: _id })
 		]);
 		
@@ -317,7 +317,7 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 		if (!user)
 			throw new Error("usernotfound");
 		
-		if (!await argon2.verify(user.password, password))
+		if (!await verify(user.password, password))
 			throw new Error("incorrectpassword");
 		
 		if (!user.abilities.login)

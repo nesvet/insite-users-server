@@ -31,7 +31,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"@nesvet/n": "^1.2.0",
-		"argon2": "^0.40.3",
+		"@node-rs/argon2": "^2.0.2",
 		"eventemitter3": "^5.0.1",
 		"insite-common": "^2.3.0",
 		"insite-db": "^2.3.0",
