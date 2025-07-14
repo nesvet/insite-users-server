@@ -1,3 +1,4 @@
+import type { Prettify } from "@nesvet/n";
 import type { CollectionIndexes, CollectionOptions, CollectionSchema } from "insite-db";
 import type { OrgsOptions } from "../orgs/types";
 import type { RolesOptions } from "../roles/types";
@@ -34,7 +35,8 @@ export type Options<AS> = {
 	collection?: Omit<CollectionOptions, "fullDocument" | "watch">;
 };
 
-export type NewUser =
+export type NewUser = Prettify<
 	Omit<UserDoc, "_id" | "createdAt" | "job" | "meta" | "name" | "org"> &
 	Partial<Pick<UserDoc, "job" | "meta" | "org">> &
-	{ name: Partial<UserDoc["name"]> };
+	{ name: Partial<UserDoc["name"]> }
+>;

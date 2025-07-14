@@ -1,5 +1,6 @@
-import { CollectionIndexes, CollectionOptions, CollectionSchema } from "insite-db";
-import { GenericAbilities } from "../abilities";
+import type { Prettify } from "@nesvet/n";
+import type { CollectionIndexes, CollectionOptions, CollectionSchema } from "insite-db";
+import type { GenericAbilities } from "../abilities";
 
 
 export type RoleDoc = {
@@ -19,6 +20,7 @@ export type RolesOptions = {
 	collection?: Omit<CollectionOptions, "fullDocument" | "watch">;
 };
 
-export type NewRole =
+export type NewRole = Prettify<
 	Omit<RoleDoc, "abilities" | "createdAt" | "description" | "involves" | "meta" | "title"> &
-	Partial<Pick<RoleDoc, "description" | "involves" | "meta" | "title">>;
+	Partial<Pick<RoleDoc, "description" | "involves" | "meta" | "title">>
+>;

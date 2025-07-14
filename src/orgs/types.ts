@@ -1,4 +1,5 @@
-import { CollectionIndexes, CollectionOptions, CollectionSchema } from "insite-db";
+import type { Prettify } from "@nesvet/n";
+import type { CollectionIndexes, CollectionOptions, CollectionSchema } from "insite-db";
 
 
 export type OrgDoc = {
@@ -17,6 +18,7 @@ export type OrgsOptions = {
 	collection?: Omit<CollectionOptions, "fullDocument" | "watch">;
 };
 
-export type NewOrg =
+export type NewOrg = Prettify<
 	Omit<OrgDoc, "_id" | "createdAt" | "meta" | "note" | "title"> &
-	Partial<Pick<OrgDoc, "meta" | "note" | "title">>;
+	Partial<Pick<OrgDoc, "meta" | "note" | "title">>
+>;

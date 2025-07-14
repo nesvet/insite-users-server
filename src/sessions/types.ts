@@ -1,4 +1,4 @@
-import { CollectionIndexes, CollectionOptions, CollectionSchema } from "insite-db";
+import type { CollectionIndexes, CollectionOptions, CollectionSchema } from "insite-db";
 
 
 export type SessionDoc = {

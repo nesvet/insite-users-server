@@ -1,3 +1,4 @@
+import type { Prettify } from "@nesvet/n";
 import type { AbilitySchema as OriginalAbilitySchema } from "insite-common";
 
 
@@ -11,11 +12,13 @@ export type AbilityObject = Record<string, Ability | AbilityParam>;
 export type AbilityBoolean = true;
 export type Ability = AbilityBoolean | { [key: string]: Ability | AbilityParam };
 
-export type AbilitySchema = Omit<OriginalAbilitySchema, "abilities"> & {
-	level: number;
-	longId: string;
-	abilities?: AbilitySchema[];
-};
+export type AbilitySchema = Prettify<
+	Omit<OriginalAbilitySchema, "abilities"> & {
+		level: number;
+		longId: string;
+		abilities?: AbilitySchema[];
+	}
+>;
 
 export type GenericAbilities = Record<string, Ability>;
 
