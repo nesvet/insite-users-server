@@ -92,7 +92,7 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 	roles!: Roles<AS>;
 	sessions!: Sessions<AS>;
 	orgs!: Orgs<AS>;
-	avatars!: Avatars<AS>;
+	avatars!: Avatars;
 	
 	byEmail = new Map();
 	bySessionId = new Map();
@@ -174,7 +174,7 @@ export class Users<AS extends AbilitiesSchema> extends Map<string, User<AS>> {
 			this.roles = new Roles<AS>(this, { ...rolesOptions, collection: { quiet, ...rolesOptions?.collection } });
 			this.orgs = new Orgs<AS>(this, { ...orgsOptions, collection: { quiet, ...orgsOptions?.collection } });
 			this.sessions = new Sessions<AS>(this, { ...sessionsOptions, collection: { quiet, ...sessionsOptions?.collection } });
-			this.avatars = new Avatars<AS>(this, { ...avatarsOptions, collection: { quiet, ...avatarsOptions?.collection } });
+			this.avatars = new Avatars(this, { ...avatarsOptions, collection: { quiet, ...avatarsOptions?.collection } });
 			
 			await this.roles.init();
 			await this.orgs.preinit();

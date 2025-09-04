@@ -1,13 +1,15 @@
-import type { AbilitiesSchema } from "insite-common";
 import { Binary, type WatchedCollection } from "insite-db";
 import type { Users } from "../Users";
 import { schema } from "./schema";
 import type { AvatarDoc, AvatarsOptions } from "./types";
 
 
-export class Avatars<AS extends AbilitiesSchema> {
-	constructor(users: Users<AS>, options: AvatarsOptions = {}) {
-		this.users = users;
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+
+export class Avatars {
+	constructor(users: Users<any>, options: AvatarsOptions = {}) {
+		this.#users = users;
 		this.collections = users.collections;
 		
 		this.initOptions = options;
@@ -17,7 +19,7 @@ export class Avatars<AS extends AbilitiesSchema> {
 	readonly TYPES_ACCEPTED = [ "image/webp" ];
 	readonly MAX_SIZE = 1024 * 512;
 	
-	users;
+	#users;
 	collections;
 	
 	collection!: WatchedCollection<AvatarDoc>;
@@ -26,7 +28,7 @@ export class Avatars<AS extends AbilitiesSchema> {
 	
 	async init() {
 		
-		if (!this.users.isInited) {
+		if (!this.#users.isInited) {
 			const {
 				collection: collectionOptions
 			} = this.initOptions!;
@@ -57,7 +59,7 @@ export class Avatars<AS extends AbilitiesSchema> {
 				data: binaryData,
 				meta: {}
 			}, { upsert: true }),
-			this.users.collection.updateOne({ _id }, { $set: { avatar: ts } })
+			this.#users.collection.updateOne({ _id }, { $set: { avatar: ts } })
 		]);
 		
 	}
@@ -66,7 +68,7 @@ export class Avatars<AS extends AbilitiesSchema> {
 		
 		const [ { deletedCount } ] = await Promise.all([
 			this.collection.deleteOne({ _id }),
-			this.users.collection.updateOne({ _id }, { $set: { avatar: null } })
+			this.#users.collection.updateOne({ _id }, { $set: { avatar: null } })
 		]);
 		
 		return Boolean(deletedCount);
